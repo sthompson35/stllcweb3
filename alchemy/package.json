@@ -1,0 +1,25 @@
+{
+  "name": "stllcweb3-alchemy",
+  "version": "1.0.0",
+  "description": "Alchemy SDK integration for stllcweb3 — NFT, token, and transfer utilities",
+  "main": "index.js",
+  "scripts": {
+    "nfts": "node get-nfts.js",
+    "balance": "node get-balance.js",
+    "transfers": "node get-transfers.js",
+    "webhook:server": "node webhook-server.js",
+    "webhook:setup": "node webhook-setup.js"
+  },
+  "keywords": [],
+  "author": "STLLC",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@coinbase/cdp-sdk": "^1.49.2",
+    "alchemy-sdk": "^3.6.5",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3"
+  }
+}

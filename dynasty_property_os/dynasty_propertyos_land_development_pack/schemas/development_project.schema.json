@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Dynasty PropertyOS Universal Development Project",
+  "type": "object",
+  "required": ["parcel", "project", "site_zones", "structures", "utilities"],
+  "properties": {
+    "parcel": {
+      "type": "object",
+      "required": ["parcel_code", "acreage", "state", "county"],
+      "properties": {
+        "parcel_code": {"type": "string"},
+        "apn": {"type": "string"},
+        "address": {"type": "string"},
+        "city": {"type": "string"},
+        "state": {"type": "string"},
+        "county": {"type": "string"},
+        "acreage": {"type": "number"},
+        "lot_sqft": {"type": "number"},
+        "zoning_code": {"type": "string"},
+        "topography": {"type": "string"},
+        "road_access": {"type": "string"}
+      }
+    },
+    "project": {
+      "type": "object",
+      "required": ["project_code", "project_name", "project_type", "strategy"],
+      "properties": {
+        "project_code": {"type": "string"},
+        "project_name": {"type": "string"},
+        "project_type": {"enum": ["RAW_LAND", "RESIDENTIAL", "COMMERCIAL", "MIXED_USE", "SUBDIVISION", "INDUSTRIAL"]},
+        "strategy": {"type": "string"},
+        "residential_units": {"type": "integer"},
+        "commercial_sqft": {"type": "number"},
+        "total_building_sqft": {"type": "number"}
+      }
+    },
+    "site_zones": {"type": "array", "items": {"$ref": "#/$defs/site_zone"}},
+    "structures": {"type": "array", "items": {"$ref": "#/$defs/structure"}},
+    "utilities": {"type": "array", "items": {"$ref": "#/$defs/utility"}}
+  },
+  "$defs": {
+    "site_zone": {
+      "type": "object",
+      "required": ["zone_name", "zone_type", "area_sqft"],
+      "properties": {
+        "zone_name": {"type": "string"},
+        "zone_type": {"enum": ["BUILD_PAD", "DRIVEWAY", "PARKING", "LANDSCAPE", "STORMWATER", "SEPTIC", "UTILITY_EASEMENT", "OPEN_SPACE"]},
+        "area_sqft": {"type": "number"},
+        "surface_material": {"type": "string"}
+      }
+    },
+    "structure": {
+      "type": "object",
+      "required": ["structure_code", "structure_type", "footprint_sqft"],
+      "properties": {
+        "structure_code": {"type": "string"},
+        "structure_type": {"enum": ["SFR", "DUPLEX", "MULTIFAMILY", "RETAIL", "OFFICE", "WAREHOUSE", "GARAGE", "ADU"]},
+        "footprint_sqft": {"type": "number"},
+        "gross_sqft": {"type": "number"},
+        "stories": {"type": "number"},
+        "foundation_type": {"type": "string"},
+        "roof_type": {"type": "string"}
+      }
+    },
+    "utility": {
+      "type": "object",
+      "required": ["utility_type", "connection_status"],
+      "properties": {
+        "utility_type": {"enum": ["WATER", "SEWER", "SEPTIC", "ELECTRIC", "GAS", "FIBER", "STORMWATER"]},
+        "provider": {"type": "string"},
+        "connection_status": {"type": "string"},
+        "distance_to_connection_ft": {"type": "number"},
+        "estimated_connection_cost": {"type": "number"}
+      }
+    }
+  }
+}

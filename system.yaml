@@ -1,0 +1,585 @@
+# =============================================================================
+# stllcweb3 — AI Agent System Configuration
+# Programmable asset engine: blockchain + automation + monetization
+# =============================================================================
+
+system:
+  name: stllcweb3
+  version: "1.0.0"
+  description: >
+    Multi-agent system for deploying, monitoring, and operating the
+    stllcweb3 smart contract suite on Polygon. Agents operate the full
+    pipeline: Asset → Token → Contract → Wallet → Marketplace → Monetization.
+  model: claude-sonnet-4-6
+  network:
+    testnet: polygon-amoy
+    mainnet: polygon
+    chain_id_testnet: 80002
+    chain_id_mainnet: 137
+    rpc_testnet: ${POLYGON_AMOY_RPC_URL}
+    rpc_mainnet: ${POLYGON_RPC_URL}
+  project:
+    sequence_project_id: "48396"
+    sequence_url: "https://sequence.build/project/48396"
+    manager_wallet: ${MANAGER_WALLET}
+  security:
+    never_expose: [DEPLOYER_PRIVATE_KEY, ALCHEMY_API_KEY, ALCHEMY_AUTH_TOKEN]
+    never_commit: [.env]
+    key_compromise_response: rotate_immediately_and_redeploy
+
+# =============================================================================
+# CONTRACTS — deployed on Polygon Amoy (testnet) / Polygon (mainnet)
+# =============================================================================
+
+contracts:
+  STLLCEquityToken:
+    standard: ERC-20
+    type: upgradeable-uups
+    description: Equity share token — 1 STLLC = 1 share of STLLC entity
+    supply: 2000
+    abi: artifacts/contracts/core/STLLCEquityToken.sol/STLLCEquityToken.json
+    address_env: CONTRACT_EQUITY
+    roles: [DEFAULT_ADMIN_ROLE, PAUSER_ROLE, UPGRADER_ROLE]
+    key_functions:
+      - distributeInvestorTokens(address investor, uint256 amount)
+      - setFaceValue(uint256 valueUSD)
+      - distributeReturns(uint256 totalUSDC)
+      - createProposal(string description, uint256 votingPeriod)
+      - vote(uint256 proposalId, bool support)
+      - addToWhitelist(address investor)
+
+  STDealNote:
+    standard: ERC-20
+    type: standard
+    description: Real estate deal note — ST-DEAL-008, 142 Ridgewood Dr De Soto MO
+    deal_ref: "ST-DEAL-008"
+    tokens: 1290
+    face_value_usdc: 100
+    repayment_usdc: 106
+    abi: artifacts/contracts/core/STDealNote.sol/STDealNote.json
+    address_env: CONTRACT_NOTE
+    key_functions:
+      - issueTokens(address investor, uint256 amount)
+      - distributeInvestorTokens(address investor, uint256 amount)
+      - redeem(uint256 tokenAmount)
+      - addToWhitelist(address investor)
+
+  SHTXUtilityToken:
+    standard: ERC-20
+    type: standard
+    description: KhakiSol utility token — earned on purchases, redeemable for rewards
+    abi: artifacts/contracts/core/SHTXUtilityToken.sol/SHTXUtilityToken.json
+    address_env: CONTRACT_SHTX
+    daily_mint_limit: 1000
+    key_functions:
+      - mintSHTX(address to, uint256 amount, string reason)
+      - setRewardRate(uint256 ratePerCent)
+      - calculatePurchaseReward(uint256 purchaseUSDCents)
+
+  STDealTrackRecord:
+    standard: ERC-721
+    type: soulbound-nft
+    description: Soulbound NFT — tracks deal participation on-chain, non-transferable
+    abi: artifacts/contracts/core/STDealTrackRecord.sol/STDealTrackRecord.json
+    address_env: CONTRACT_TRACK
+    key_functions:
+      - mintRecord(address participant, string dealRef, string role)
+
+  KhakiSolLoyalty:
+    standard: ERC-1155
+    type: multi-token
+    description: KhakiSol loyalty system — badges, product NFTs, SHTX currency
+    abi: artifacts/contracts/core/KhakiSolLoyalty.sol/KhakiSolLoyalty.json
+    address_env: CONTRACT_LOYALTY
+    token_ids:
+      0: SHTX_CURRENCY
+      1: SCOUT_BADGE
+      2: OPERATOR_BADGE
+      3: TROOPER_BADGE
+      4: COMMANDER_BADGE
+      5: FOUNDING_MEMBER
+      "6+": PRODUCT_NFT
+    key_functions:
+      - mintBadge(address to, uint256 badgeType, uint256 amount)
+      - mintProductNFT(address buyer, uint256 tokenId)
+      - mintReward(address to, uint256 amount)
+      - batchMintBadges(address[] wallets, uint256 badgeType, uint256 amount)
+
+# =============================================================================
+# AGENTS
+# =============================================================================
+
+agents:
+
+  # ---------------------------------------------------------------------------
+  # ARCHITECT — System design and strategic decision-making
+  # ---------------------------------------------------------------------------
+  - name: architect
+    model: claude-opus-4-6
+    description: >
+      Master architect for stllcweb3. Translates real-world assets into
+      programmable digital assets. Designs contract systems with monetization
+      built-in. Does not theorize — designs, structures, and deploys.
+    role: strategic
+    activation_commands:
+      - "Deploy contract"
+      - "Mint asset"
+      - "Build marketplace"
+      - "Tokenize deal"
+      - "Connect wallet"
+      - "Design monetization"
+    context:
+      - .github/prompts/plan-stllcweb3.prompt.md
+      - system.yaml
+    decision_framework:
+      - Does this increase control?
+      - Does this increase monetization?
+      - Does this increase scalability?
+      - If not → eliminate it
+    pipeline: "Asset → Token Standard → Smart Contract → Wallet Layer → Marketplace → Monetization Engine"
+    allowed_tools: [Read, Grep, Glob, WebSearch, WebFetch]
+    disallowed_tools: [Bash, Edit, Write]
+    constraints:
+      - Speed over perfection
+      - Simplicity over complexity
+      - One working system over ten ideas
+      - Never assume direct property title equals token
+
+  # ---------------------------------------------------------------------------
+  # DEPLOYER — Compiles and deploys contracts to blockchain
+  # ---------------------------------------------------------------------------
+  - name: deployer
+    model: claude-sonnet-4-6
+    description: >
+      Compiles Solidity contracts, deploys to Polygon Amoy testnet or
+      Polygon mainnet, saves deployment manifests, and prepares Sequence
+      Builder import packages.
+    role: operational
+    triggers:
+      - manual: "Deploy contract"
+      - manual: "npx hardhat run scripts/deploy.js --network polygonAmoy"
+    context:
+      - hardhat.config.js
+      - scripts/deploy.js
+      - deployments/
+      - contracts/core/
+    allowed_tools: [Read, Bash, Glob, Grep]
+    allowed_bash:
+      - "npx hardhat compile"
+      - "npx hardhat run scripts/deploy.js --network polygonAmoy"
+      - "npx hardhat run scripts/deploy.js --network polygon"
+      - "node sequence/prepare-import.js"
+    disallowed_bash:
+      - "git push"
+      - "rm -rf"
+    pre_deploy_checklist:
+      - Verify DEPLOYER_PRIVATE_KEY is set in .env
+      - Verify wallet has sufficient MATIC (minimum 0.9 for full suite)
+      - Verify RPC URLs are active (Alchemy)
+      - Compile contracts cleanly
+      - Run on testnet before mainnet
+    post_deploy_actions:
+      - Save manifest to deployments/{network}.json
+      - Run node sequence/prepare-import.js
+      - Update CONTRACT_* vars in .env
+      - Verify contracts on Polygonscan
+    output:
+      - deployments/polygonAmoy.json
+      - deployments/polygon.json
+      - sequence/sequence-contracts.populated.json
+
+  # ---------------------------------------------------------------------------
+  # MONITOR — Watches blockchain events via Alchemy webhooks
+  # ---------------------------------------------------------------------------
+  - name: monitor
+    model: claude-haiku-4-5
+    description: >
+      Listens to Alchemy Notify webhooks for on-chain activity across all
+      stllcweb3 contracts. Logs activity, triggers alerts, and routes events
+      to downstream agents.
+    role: autonomous
+    triggers:
+      - webhook: ADDRESS_ACTIVITY
+        addresses:
+          - ${MANAGER_WALLET}
+          - ${CONTRACT_EQUITY}
+          - ${CONTRACT_NOTE}
+          - ${CONTRACT_SHTX}
+          - ${CONTRACT_TRACK}
+          - ${CONTRACT_LOYALTY}
+      - webhook: NFT_ACTIVITY
+        contracts:
+          - ${CONTRACT_TRACK}
+      - webhook: MINED_TRANSACTION
+      - webhook: DROPPED_TRANSACTION
+    server:
+      script: alchemy/webhook-server.js
+      port: 4041  # ${WEBHOOK_PORT} — ngrok uses 4040 for its management UI
+      endpoint: /webhook
+      public_url: ${WEBHOOK_URL}
+      signing_key: ${ALCHEMY_WEBHOOK_SIGNING_KEY}
+    context:
+      - alchemy/webhook-server.js
+      - alchemy/webhook.js
+    event_routing:
+      ADDRESS_ACTIVITY:
+        - log to console
+        - notify governance agent on vote transactions
+        - notify deal agent on redemption transactions
+      NFT_ACTIVITY:
+        - log soulbound NFT mints
+      MINED_TRANSACTION:
+        - confirm deploy transactions
+      DROPPED_TRANSACTION:
+        - alert operator for retry
+    allowed_tools: [Read, Bash]
+    allowed_bash:
+      - "node alchemy/webhook-server.js"
+
+  # ---------------------------------------------------------------------------
+  # MINTER — Automates token minting from Shopify + n8n webhooks
+  # ---------------------------------------------------------------------------
+  - name: minter
+    model: claude-haiku-4-5
+    description: >
+      Handles token minting triggered by Shopify purchase events via n8n.
+      Mints SHTX loyalty tokens and KhakiSol badges based on purchase
+      milestones. Uses MINTER_KEY wallet, never the deployer key.
+    role: autonomous
+    triggers:
+      - webhook: shopify_order_paid
+        source: n8n
+        endpoint: /webhook/shopify
+      - manual: "Mint asset"
+    context:
+      - contracts/core/KhakiSolLoyalty.sol
+      - contracts/core/SHTXUtilityToken.sol
+      - alchemy/index.js
+    env_required:
+      - MINTER_KEY
+      - CONTRACT_LOYALTY
+      - CONTRACT_SHTX
+      - POLYGON_AMOY_RPC_URL
+    mint_logic:
+      shtx_per_dollar: 10
+      badge_thresholds_usd:
+        scout: 50
+        operator: 200
+        trooper: 500
+        commander: 1000
+        founding_member: 5000
+    daily_limits:
+      SHTX: 1000_tokens_per_minter_per_day
+    security:
+      - Use MINTER_KEY not DEPLOYER_PRIVATE_KEY
+      - Validate Shopify webhook signature before minting
+      - Never mint above daily limits
+    allowed_tools: [Read, Bash, Grep]
+    allowed_bash:
+      - "node alchemy/get-balance.js"
+
+  # ---------------------------------------------------------------------------
+  # DEAL MANAGER — Manages real estate deal note lifecycle
+  # ---------------------------------------------------------------------------
+  - name: deal-manager
+    model: claude-sonnet-4-6
+    description: >
+      Manages the full lifecycle of STDealNote — from investor whitelist
+      to token issuance, distributions, and redemption at maturity.
+      Current deal: ST-DEAL-008, 142 Ridgewood Dr De Soto MO.
+    role: operational
+    triggers:
+      - manual: "Tokenize deal"
+      - manual: "Issue tokens"
+      - manual: "Distribute returns"
+      - manual: "Redeem note"
+    context:
+      - contracts/core/STDealNote.sol
+      - contracts/core/STDealTrackRecord.sol
+      - deployments/
+    current_deal:
+      ref: "ST-DEAL-008"
+      property: "142 Ridgewood Dr, De Soto, MO 63020"
+      arv_usd: 195000
+      tokens: 1290
+      face_value_per_token_usdc: 100
+      repayment_per_token_usdc: 106
+      maturity_days: 180
+    workflow:
+      1_whitelist: addToWhitelist(investorAddress)
+      2_issue:     issueTokens(investorAddress, amount)
+      3_distribute: distributeInvestorTokens(investorAddress, amount)
+      4_track:     mintRecord(investorAddress, dealRef, role)
+      5_redeem:    redeem(tokenAmount)
+    allowed_tools: [Read, Grep, Glob, Bash]
+    allowed_bash:
+      - "node alchemy/get-transfers.js"
+      - "node alchemy/get-balance.js"
+
+  # ---------------------------------------------------------------------------
+  # GOVERNANCE — Manages equity token proposals and voting
+  # ---------------------------------------------------------------------------
+  - name: governance
+    model: claude-sonnet-4-6
+    description: >
+      Manages STLLCEquityToken governance — proposal creation, voting,
+      and execution. Ensures quorum and majority rules are respected.
+      Token holders vote on operating agreement changes and distributions.
+    role: operational
+    triggers:
+      - manual: "Create proposal"
+      - manual: "Cast vote"
+      - manual: "Check proposal status"
+    context:
+      - contracts/core/STLLCEquityToken.sol
+    proposal_rules:
+      min_voting_period_days: 1
+      max_voting_period_days: 14
+      proposal_threshold: requires_token_balance
+      quorum: defined_in_contract
+    use_cases:
+      - Operating agreement amendments
+      - Distribution rate changes
+      - Investor whitelist updates
+      - Contract upgrade approvals
+    allowed_tools: [Read, Grep]
+
+  # ---------------------------------------------------------------------------
+  # REPORTER — Generates portfolio and activity reports
+  # ---------------------------------------------------------------------------
+  - name: reporter
+    model: claude-haiku-4-5
+    description: >
+      Generates on-chain reports for investor portfolio, deal status,
+      token distributions, NFT holdings, and wallet activity. Reads from
+      Alchemy API and deployment manifests.
+    role: operational
+    triggers:
+      - manual: "Generate report"
+      - schedule: daily
+    context:
+      - alchemy/
+      - deployments/
+    report_types:
+      portfolio:
+        script: alchemy/get-balance.js
+        includes: [MATIC, STLLC, STDEAL008, SHTX]
+      nft_holdings:
+        script: alchemy/get-nfts.js
+        includes: [STDealTrackRecord soulbound NFTs]
+      transfer_history:
+        script: alchemy/get-transfers.js
+        includes: [all ERC-20 and ERC-1155 transfers]
+    allowed_tools: [Read, Bash, Grep]
+    allowed_bash:
+      - "node alchemy/get-balance.js"
+      - "node alchemy/get-nfts.js"
+      - "node alchemy/get-transfers.js"
+
+# =============================================================================
+# SHARED TOOLS & SCRIPTS
+# =============================================================================
+
+tools:
+  compile:
+    command: npx hardhat compile
+    description: Compile all Solidity contracts to artifacts/
+    run_before: deploy
+
+  deploy_amoy:
+    command: npx hardhat run scripts/deploy.js --network polygonAmoy
+    description: Deploy full contract suite to Polygon Amoy testnet
+    agent: deployer
+
+  deploy_mainnet:
+    command: npx hardhat run scripts/deploy.js --network polygon
+    description: Deploy full contract suite to Polygon mainnet
+    agent: deployer
+    requires_confirmation: true
+
+  sequence_prep:
+    command: node sequence/prepare-import.js
+    description: Populate sequence-contracts.json with deployed addresses
+    run_after: deploy_amoy
+
+  webhook_server:
+    command: node alchemy/webhook-server.js
+    description: Start Alchemy webhook receiver on port 4040
+    agent: monitor
+    requires_env: [ALCHEMY_WEBHOOK_SIGNING_KEY, WEBHOOK_PORT]
+
+  webhook_setup:
+    command: node alchemy/webhook-setup.js
+    description: Register webhooks with Alchemy Notify API
+    agent: monitor
+    requires_env: [ALCHEMY_AUTH_TOKEN, WEBHOOK_URL]
+    run_once: true
+
+  serve:
+    command: python -m http.server 3031 --directory .
+    description: Serve frontend dashboard at http://localhost:3031/frontend/src/index.html
+
+# =============================================================================
+# ENVIRONMENT VARIABLES REFERENCE
+# =============================================================================
+
+env:
+  required:
+    - DEPLOYER_PRIVATE_KEY   # Signs deployment transactions
+    - MANAGER_WALLET         # Receives contract ownership
+    - POLYGON_AMOY_RPC_URL   # Alchemy Amoy RPC
+    - POLYGON_RPC_URL        # Alchemy Polygon mainnet RPC
+    - ALCHEMY_API_KEY        # Alchemy SDK key
+    - POLYGONSCAN_API_KEY    # Contract verification
+
+  post_deploy:
+    - CONTRACT_EQUITY        # STLLCEquityToken proxy address
+    - CONTRACT_NOTE          # STDealNote address
+    - CONTRACT_SHTX          # SHTXUtilityToken address
+    - CONTRACT_TRACK         # STDealTrackRecord address
+    - CONTRACT_LOYALTY       # KhakiSolLoyalty address
+
+  webhook:
+    - ALCHEMY_AUTH_TOKEN          # Alchemy webhook management
+    - ALCHEMY_WEBHOOK_SIGNING_KEY # Webhook HMAC verification
+    - WEBHOOK_URL                 # Public ngrok or server URL
+    - WEBHOOK_PORT                # Default 4040
+
+  integrations:
+    - WEB3AUTH_CLIENT_ID     # Web3Auth social login
+    - MINTER_KEY             # n8n automation wallet private key
+    - SEQUENCE_PROJECT_KEY   # Sequence Builder API key
+
+# =============================================================================
+# DOCKER SERVICES
+# =============================================================================
+
+docker:
+  compose_file: docker-compose.yml
+  network: stllcweb3
+
+  services:
+
+    webhook-server:
+      container_id_label: stllcweb3-webhook
+      image: node:20-alpine
+      port_host: 4041
+      port_container: 4041
+      command: node alchemy/webhook-server.js
+      env_file: .env
+      volumes:
+        - ".:/app"
+      purpose: Receives Alchemy Notify on-chain events (ADDRESS_ACTIVITY, NFT_ACTIVITY, MINED_TRANSACTION)
+
+    n8n:
+      container_id_label: stllcweb3-n8n
+      image: n8nio/n8n:latest
+      port_host: 5680
+      port_container: 5678
+      env_file: .env
+      purpose: Shopify order webhook → SHTX mint / badge trigger pipeline
+      ui: http://localhost:5680
+      depends_on: redis
+
+    redis:
+      container_id_label: stllcweb3-redis
+      image: redis:7-alpine
+      port_host: 6381
+      port_container: 6379
+      purpose: n8n queue backend and session cache
+
+    frontend:
+      container_id_label: stllcweb3-frontend
+      image: python:3.12-slim
+      port_host: 3031
+      port_container: 3031
+      command: python -m http.server 3031
+      purpose: Serves dashboard at http://localhost:3031/frontend/src/index.html
+
+  port_registry:
+    # Ports reserved across the local Docker environment — avoid conflicts
+    reserved_by_other_projects:
+      3000: "ultimate-dynasty-os-webui (open-webui)"
+      5000: "rgem-rgem-app"
+      5001: "realtor-agent-pipeline"
+      5002: "realtor-agent-financial"
+      5432: "ultimate-dynasty-os-db (postgres)"
+      5555: "dynasty-os-flower"
+      5678: "ultimate-dynasty-os-n8n"
+      5679: "docker-n8n"
+      6379: "redis-realtor"
+      6380: "dynasty-os-redis"
+      8000: "stock-agent-stock-agent"
+      8001: "dynasty-os-gateway"
+      8080: "bank_php"
+      8081: "bigdata_php"
+      9000: "dynasty-os-minio"
+      9001: "dynasty-os-minio (console)"
+      1434: "dynasty-os-sqlserver"
+    stllcweb3_ports:
+      4041: webhook-server
+      5680: n8n
+      6381: redis
+      3031: frontend
+
+  commands:
+    start:   docker compose up -d
+    stop:    docker compose down
+    logs:    docker compose logs -f
+    restart: docker compose restart
+    status:  docker compose ps
+
+# =============================================================================
+# DEPLOYMENT PIPELINE
+# =============================================================================
+
+pipeline:
+  phase_1_proof:
+    steps:
+      - name: Fund deployer wallet
+        action: Send 0.9+ MATIC to ${MANAGER_WALLET} via faucet.polygon.technology
+      - name: Compile contracts
+        command: npm run compile
+      - name: Deploy to Amoy
+        command: npm run deploy:amoy
+        agent: deployer
+      - name: Prepare Sequence import
+        command: npm run sequence:prep
+      - name: Import to Sequence Builder
+        action: Open sequence.build/project/48396/contracts and paste addresses
+
+  phase_2_functionality:
+    steps:
+      - name: Start webhook server
+        command: node alchemy/webhook-server.js
+        agent: monitor
+      - name: Register webhooks
+        command: node alchemy/webhook-setup.js
+        agent: monitor
+      - name: Whitelist test investor
+        action: Use dashboard → Contracts → STLLCEquityToken → addToWhitelist
+      - name: Issue test tokens
+        action: Use dashboard → Contracts → STDealNote → issueTokens
+
+  phase_3_monetization:
+    steps:
+      - name: Configure n8n Shopify webhook
+        action: Set endpoint to ${WEBHOOK_URL}/webhook/shopify
+        agent: minter
+      - name: Set SHTX reward rate
+        action: Use dashboard → SHTX → setRewardRate(10)
+      - name: Enable royalties
+        action: Set royaltyRecipient and royaltyBps in KhakiSolLoyalty
+      - name: Test mint flow
+        action: Simulate Shopify order → verify SHTX mint
+
+  phase_4_scale:
+    steps:
+      - name: Deploy to Polygon mainnet
+        command: npm run deploy:polygon
+        requires_confirmation: true
+        agent: deployer
+      - name: Transfer ownership
+        action: Transfer contract admin to multisig or hardware wallet
+      - name: Verify contracts on Polygonscan
+        command: npx hardhat verify --network polygon ${CONTRACT_EQUITY}

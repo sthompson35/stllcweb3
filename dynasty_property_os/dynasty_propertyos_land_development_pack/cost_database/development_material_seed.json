@@ -1,0 +1,10 @@
+[
+  {"category_code":"SITE_GRADING","material_code":"GRADING_STANDARD","material_name":"Standard site grading","unit":"sqft","cost_per_unit":1.25,"labor_per_unit":0.85,"land_grade":true},
+  {"category_code":"DRIVEWAY","material_code":"DRIVE_CONCRETE","material_name":"Concrete driveway","unit":"sqft","cost_per_unit":7.50,"labor_per_unit":4.00,"land_grade":true},
+  {"category_code":"DRIVEWAY","material_code":"DRIVE_GRAVEL","material_name":"Gravel driveway","unit":"sqft","cost_per_unit":2.25,"labor_per_unit":1.25,"land_grade":true},
+  {"category_code":"PARKING","material_code":"PARK_ASPHALT","material_name":"Asphalt parking area","unit":"sqft","cost_per_unit":5.50,"labor_per_unit":2.75,"commercial_grade":true,"land_grade":true},
+  {"category_code":"LANDSCAPE","material_code":"LAWN_SEED","material_name":"Seeded lawn","unit":"sqft","cost_per_unit":0.35,"labor_per_unit":0.25,"land_grade":true},
+  {"category_code":"STORMWATER","material_code":"GRAVEL_SWALE","material_name":"Gravel drainage swale","unit":"lf","cost_per_unit":32.00,"labor_per_unit":18.00,"land_grade":true},
+  {"category_code":"FOUNDATION","material_code":"SLAB_STANDARD","material_name":"Standard concrete slab","unit":"sqft","cost_per_unit":9.50,"labor_per_unit":5.25,"residential_grade":true},
+  {"category_code":"COMMERCIAL_SHELL","material_code":"PREENG_METAL","material_name":"Pre-engineered metal building shell","unit":"sqft","cost_per_unit":52.00,"labor_per_unit":28.00,"commercial_grade":true}
+]

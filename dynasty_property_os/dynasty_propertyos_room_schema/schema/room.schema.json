@@ -1,0 +1,255 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dynastypropertyos.local/schemas/room.schema.json",
+  "title": "Dynasty PropertyOS Room Schema",
+  "description": "Canonical room data contract for Supabase, API, Blender scripts, cost engine, accounting, and reports.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "property_id",
+    "rooms"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "examples": ["1.0.0"]
+    },
+    "property_id": {
+      "type": "string",
+      "minLength": 3,
+      "examples": ["USDA_1BEDROOM_001"]
+    },
+    "property_short_code": {
+      "type": "string",
+      "examples": ["USDA001"]
+    },
+    "unit_system": {
+      "type": "string",
+      "enum": ["imperial", "metric"],
+      "default": "imperial"
+    },
+    "rooms": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/room"
+      }
+    }
+  },
+  "$defs": {
+    "room": {
+      "type": "object",
+      "required": [
+        "room_id",
+        "room_code",
+        "room_name",
+        "room_type",
+        "floor_level",
+        "status",
+        "geometry",
+        "envelope",
+        "materials",
+        "mep",
+        "cost_mapping",
+        "blender_mapping"
+      ],
+      "properties": {
+        "room_id": {
+          "type": "string",
+          "pattern": "^ROOM_[0-9]{3}$"
+        },
+        "room_code": {
+          "type": "string",
+          "pattern": "^[A-Z0-9_]+$"
+        },
+        "room_name": {
+          "type": "string",
+          "minLength": 2
+        },
+        "room_type": {
+          "type": "string",
+          "enum": [
+            "living_room",
+            "kitchen",
+            "dining",
+            "bedroom",
+            "bathroom",
+            "utility",
+            "hallway",
+            "basement",
+            "closet",
+            "mechanical",
+            "garage",
+            "porch",
+            "deck",
+            "other"
+          ]
+        },
+        "floor_level": {
+          "type": "string",
+          "enum": ["basement", "level_1", "level_2", "attic", "exterior"]
+        },
+        "status": {
+          "type": "string",
+          "enum": ["planned", "active", "demo", "future", "optional", "archived"]
+        },
+        "source_plan_reference": {
+          "type": "string"
+        },
+        "geometry": {
+          "$ref": "#/$defs/geometry"
+        },
+        "envelope": {
+          "$ref": "#/$defs/envelope"
+        },
+        "openings": {
+          "type": "object",
+          "properties": {
+            "doors": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/door" }
+            },
+            "windows": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/window" }
+            }
+          },
+          "additionalProperties": false
+        },
+        "materials": {
+          "$ref": "#/$defs/materials"
+        },
+        "mep": {
+          "$ref": "#/$defs/mep"
+        },
+        "cost_mapping": {
+          "$ref": "#/$defs/cost_mapping"
+        },
+        "blender_mapping": {
+          "$ref": "#/$defs/blender_mapping"
+        },
+        "notes": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "geometry": {
+      "type": "object",
+      "required": ["origin_x", "origin_y", "origin_z", "width", "length", "height", "area_sqft", "perimeter_lf", "floor_area_sqft", "ceiling_area_sqft"],
+      "properties": {
+        "origin_x": { "type": "number" },
+        "origin_y": { "type": "number" },
+        "origin_z": { "type": "number" },
+        "width": { "type": "number", "exclusiveMinimum": 0 },
+        "length": { "type": "number", "exclusiveMinimum": 0 },
+        "height": { "type": "number", "exclusiveMinimum": 0 },
+        "area_sqft": { "type": "number", "minimum": 0 },
+        "perimeter_lf": { "type": "number", "minimum": 0 },
+        "floor_area_sqft": { "type": "number", "minimum": 0 },
+        "ceiling_area_sqft": { "type": "number", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "envelope": {
+      "type": "object",
+      "required": ["wall_type", "floor_type", "ceiling_type", "exterior_exposure", "conditioned_space"],
+      "properties": {
+        "wall_type": { "type": "string", "enum": ["interior", "exterior", "load_bearing", "partition", "mixed"] },
+        "floor_type": { "type": "string", "enum": ["slab", "subfloor", "basement_slab", "crawlspace_floor", "decking"] },
+        "ceiling_type": { "type": "string", "enum": ["flat", "vaulted", "open_to_roof", "unfinished"] },
+        "exterior_exposure": { "type": "boolean" },
+        "conditioned_space": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "door": {
+      "type": "object",
+      "required": ["door_id", "door_type", "width", "height", "wall", "offset_from_corner"],
+      "properties": {
+        "door_id": { "type": "string", "pattern": "^DR[0-9]{3}$" },
+        "door_type": { "type": "string", "enum": ["entry", "interior", "closet", "mechanical", "sliding", "pocket"] },
+        "width": { "type": "number", "exclusiveMinimum": 0 },
+        "height": { "type": "number", "exclusiveMinimum": 0 },
+        "wall": { "type": "string", "enum": ["north", "south", "east", "west"] },
+        "offset_from_corner": { "type": "number", "minimum": 0 },
+        "swing_direction": { "type": "string", "enum": ["left_in", "right_in", "left_out", "right_out", "sliding", "none"] },
+        "material_package": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "window": {
+      "type": "object",
+      "required": ["window_id", "window_type", "width", "height", "sill_height", "wall", "offset_from_corner"],
+      "properties": {
+        "window_id": { "type": "string", "pattern": "^WN[0-9]{3}$" },
+        "window_type": { "type": "string", "enum": ["single_hung", "double_hung", "casement", "fixed", "slider", "egress", "awning"] },
+        "width": { "type": "number", "exclusiveMinimum": 0 },
+        "height": { "type": "number", "exclusiveMinimum": 0 },
+        "sill_height": { "type": "number", "minimum": 0 },
+        "wall": { "type": "string", "enum": ["north", "south", "east", "west"] },
+        "offset_from_corner": { "type": "number", "minimum": 0 },
+        "material_package": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "materials": {
+      "type": "object",
+      "required": ["floor_material_id", "wall_material_id", "ceiling_material_id"],
+      "properties": {
+        "floor_material_id": { "type": "string" },
+        "wall_material_id": { "type": "string" },
+        "ceiling_material_id": { "type": "string" },
+        "trim_material_id": { "type": "string" },
+        "countertop_material_id": { "type": "string" },
+        "cabinet_material_id": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "mep": {
+      "type": "object",
+      "required": ["has_water", "has_gas", "has_exhaust"],
+      "properties": {
+        "electrical_zone_id": { "type": "string" },
+        "plumbing_zone_id": { "type": "string" },
+        "hvac_zone_id": { "type": "string" },
+        "has_water": { "type": "boolean" },
+        "has_gas": { "type": "boolean" },
+        "has_exhaust": { "type": "boolean" },
+        "required_outlets": { "type": "integer", "minimum": 0 },
+        "required_lights": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "cost_mapping": {
+      "type": "object",
+      "required": ["cost_code", "labor_complexity", "finish_level", "estimated_material_cost", "estimated_labor_cost", "estimated_total_cost", "accounting_job_code"],
+      "properties": {
+        "cost_code": { "type": "string" },
+        "labor_complexity": { "type": "string", "enum": ["low", "standard", "complex", "specialty"] },
+        "finish_level": { "type": "string", "enum": ["builder", "rental", "flip", "luxury", "ultra_luxury"] },
+        "estimated_material_cost": { "type": "number", "minimum": 0 },
+        "estimated_labor_cost": { "type": "number", "minimum": 0 },
+        "estimated_total_cost": { "type": "number", "minimum": 0 },
+        "accounting_job_code": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "blender_mapping": {
+      "type": "object",
+      "required": ["blender_collection", "blender_object_prefix", "generate_floor", "generate_walls", "generate_ceiling", "generate_openings"],
+      "properties": {
+        "blender_collection": { "type": "string" },
+        "blender_object_prefix": { "type": "string" },
+        "generate_floor": { "type": "boolean" },
+        "generate_walls": { "type": "boolean" },
+        "generate_ceiling": { "type": "boolean" },
+        "generate_openings": { "type": "boolean" },
+        "default_camera_target": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

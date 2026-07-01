@@ -1,0 +1,21 @@
+{
+  "property_code": "PROP-USDA-1BR-001",
+  "name": "USDA 1 Bedroom Expansion Option - Reference Model",
+  "scale_unit": "feet",
+  "default_wall_height": 8.0,
+  "default_wall_thickness": 0.5,
+  "rooms": [
+    {"room_name":"Living Room", "room_type":"living", "x":0, "y":0, "width":12, "length":14, "height":8},
+    {"room_name":"Kitchen Dining", "room_type":"kitchen", "x":0, "y":14, "width":12, "length":10, "height":8},
+    {"room_name":"Bedroom", "room_type":"bedroom", "x":12, "y":0, "width":11, "length":12, "height":8},
+    {"room_name":"Bathroom", "room_type":"bathroom", "x":12, "y":12, "width":6, "length":8, "height":8},
+    {"room_name":"Closet", "room_type":"closet", "x":18, "y":12, "width":5, "length":8, "height":8}
+  ],
+  "roof": {"type":"gable", "pitch":0.333, "overhang":1.0, "ridge_axis":"y"},
+  "materials": {
+    "wall_exterior":"Builder Grade Vinyl Siding",
+    "wall_interior":"White Semi Gloss Paint",
+    "roof":"Architectural Asphalt Shingle",
+    "floor":"Luxury Vinyl Plank"
+  }
+}

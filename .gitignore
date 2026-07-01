@@ -1,0 +1,23 @@
+# Environment — NEVER commit secrets
+.env
+.env.local
+.env.*.local
+.ops-wallet-backup.txt
+*-wallet-backup.txt
+
+# Hardhat
+cache/
+artifacts/
+deployments/hardhat.json
+deployments/localhost.json
+
+# Dependencies
+node_modules/
+
+# Coverage
+coverage/
+coverage.json
+
+# Misc
+.DS_Store
+*.log

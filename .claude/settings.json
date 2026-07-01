@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx hardhat *)",
+      "Bash(npx hardhat compile)",
+      "Bash(npx hardhat test*)",
+      "Bash(npx hardhat run scripts/*)",
+      "Bash(npx hardhat verify*)",
+      "Bash(npx hardhat node)",
+      "Bash(node scripts/*)",
+      "Bash(node sequence/*)",
+      "Bash(npm install)",
+      "Bash(npm run *)",
+      "Bash(python -m http.server *)",
+      "Bash(git status)",
+      "Bash(git log*)",
+      "Bash(git diff*)",
+      "Bash(netstat*)",
+      "Bash(curl *)"
+    ],
+    "deny": [
+      "Bash(git push*)",
+      "Bash(git reset --hard*)",
+      "Bash(rm -rf*)"
+    ]
+  },
+  "env": {
+    "HARDHAT_NETWORK": "hardhat"
+  }
+}

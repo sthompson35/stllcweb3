@@ -1,0 +1,38 @@
+{
+  "parcel": {
+    "parcel_code": "PARCEL_RAW_001",
+    "apn": "TBD",
+    "address": "TBD Infill Lot",
+    "city": "Park Hills",
+    "state": "MO",
+    "county": "St. Francois",
+    "acreage": 0.25,
+    "lot_sqft": 10890,
+    "zoning_code": "RES-TBD",
+    "topography": "gentle_slope",
+    "road_access": "public_road_frontage"
+  },
+  "project": {
+    "project_code": "DEV_RAW_001",
+    "project_name": "Infill Single Family Build",
+    "project_type": "RESIDENTIAL",
+    "strategy": "INFILL_BUILD",
+    "residential_units": 1,
+    "commercial_sqft": 0,
+    "total_building_sqft": 1200
+  },
+  "site_zones": [
+    {"zone_name": "Primary Build Pad", "zone_type": "BUILD_PAD", "area_sqft": 1600, "surface_material": "compacted_gravel_base"},
+    {"zone_name": "Driveway", "zone_type": "DRIVEWAY", "area_sqft": 900, "surface_material": "concrete"},
+    {"zone_name": "Front Landscape", "zone_type": "LANDSCAPE", "area_sqft": 2200, "surface_material": "seeded_lawn"},
+    {"zone_name": "Stormwater Area", "zone_type": "STORMWATER", "area_sqft": 600, "surface_material": "gravel_swale"}
+  ],
+  "structures": [
+    {"structure_code": "SFR_001", "structure_type": "SFR", "footprint_sqft": 1200, "gross_sqft": 1200, "stories": 1, "foundation_type": "slab", "roof_type": "gable"}
+  ],
+  "utilities": [
+    {"utility_type": "WATER", "provider": "municipal", "connection_status": "nearby", "distance_to_connection_ft": 50, "estimated_connection_cost": 4500},
+    {"utility_type": "SEWER", "provider": "municipal", "connection_status": "nearby", "distance_to_connection_ft": 65, "estimated_connection_cost": 6500},
+    {"utility_type": "ELECTRIC", "provider": "utility_company", "connection_status": "available", "distance_to_connection_ft": 40, "estimated_connection_cost": 3500}
+  ]
+}

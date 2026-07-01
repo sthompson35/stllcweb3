@@ -1,0 +1,40 @@
+{
+  "name": "stllcweb3",
+  "version": "1.0.0",
+  "description": "Shylow Thompson LLC — Web3 Smart Contract Suite",
+  "private": true,
+  "scripts": {
+    "prepare": "hardhat compile && npm run copy:artifacts",
+    "compile": "hardhat compile && npm run copy:artifacts",
+    "copy:artifacts": "node scripts/copy-artifacts.js",
+    "test": "hardhat test",
+    "coverage": "hardhat coverage",
+    "deploy:amoy": "hardhat run scripts/deploy.js --network polygonAmoy",
+    "deploy:polygon": "hardhat run scripts/deploy.js --network polygon",
+    "deploy:local": "hardhat run scripts/deploy.js --network hardhat",
+    "node": "hardhat node",
+    "sequence:prep": "node sequence/prepare-import.js",
+    "serve": "python -m http.server 3031 --directory ."
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-chai-matchers": "^1.0.6",
+    "@nomicfoundation/hardhat-network-helpers": "^1.0.11",
+    "@nomicfoundation/hardhat-verify": "^2.1.3",
+    "@nomiclabs/hardhat-ethers": "^2.2.3",
+    "@nomiclabs/hardhat-etherscan": "^3.1.7",
+    "@openzeppelin/hardhat-upgrades": "^1.28.0",
+    "chai": "^4.4.1",
+    "dotenv": "^16.4.5",
+    "ethers": "^5.7.2",
+    "hardhat": "^2.22.17",
+    "hardhat-gas-reporter": "^1.0.10",
+    "solidity-coverage": "^0.8.13"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.9.6",
+    "@openzeppelin/contracts-upgradeable": "^4.9.6"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}

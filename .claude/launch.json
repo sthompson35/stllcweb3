@@ -1,0 +1,19 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "shylowthompson-site",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "shylowthompson-site", "-p", "3456", "--no-clipboard"],
+      "cwd": "C:\\stllcweb3",
+      "port": 3456
+    },
+    {
+      "name": "investor-portal",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "cwd": "C:\\stllcweb3\\frontend",
+      "port": 5174
+    }
+  ]
+}

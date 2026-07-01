@@ -1,0 +1,22 @@
+{
+  "property_code": "PROP-USDA-001",
+  "name": "USDA 1 Bedroom Prototype",
+  "scale_unit": "feet",
+  "wall_height": 8,
+  "wall_thickness": 0.35,
+  "rooms": [
+    {"name":"Living Room", "type":"living", "x":0, "y":0, "width":14, "length":16, "height":8, "floor_material":"LVP Standard"},
+    {"name":"Kitchen", "type":"kitchen", "x":14, "y":0, "width":10, "length":12, "height":8, "floor_material":"Ceramic Tile"},
+    {"name":"Bedroom", "type":"bedroom", "x":0, "y":16, "width":12, "length":12, "height":8, "floor_material":"Carpet Builder"},
+    {"name":"Bathroom", "type":"bathroom", "x":12, "y":16, "width":8, "length":8, "height":8, "floor_material":"Ceramic Tile"},
+    {"name":"Utility", "type":"utility", "x":20, "y":12, "width":6, "length":8, "height":8, "floor_material":"Epoxy Utility"}
+  ],
+  "materials": {
+    "LVP Standard": {"color":"#b8875b", "cost_per_unit":4.5, "unit":"sqft"},
+    "Ceramic Tile": {"color":"#d7d7d7", "cost_per_unit":7.25, "unit":"sqft"},
+    "Carpet Builder": {"color":"#9a8f82", "cost_per_unit":3.25, "unit":"sqft"},
+    "Epoxy Utility": {"color":"#707070", "cost_per_unit":5.75, "unit":"sqft"},
+    "Exterior White Siding": {"color":"#eeeeee", "cost_per_unit":6.0, "unit":"sqft"},
+    "Architectural Shingle": {"color":"#333333", "cost_per_unit":5.5, "unit":"sqft"}
+  }
+}

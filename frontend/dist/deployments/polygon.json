@@ -1,0 +1,19 @@
+{
+  "network": "polygon",
+  "chainId": 137,
+  "deployer": "0x5B72B41e94fFFD19a053b739e39A305fe2374cDE",
+  "manager": "0x5B72B41e94fFFD19a053b739e39A305fe2374cDE",
+  "usdc": "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359",
+  "timestamp": "2026-05-17T04:36:38.097Z",
+  "contracts": {
+    "STLLCEquityToken": {
+      "proxy": "0xE6160359c85B8D487d2FDfa2C7384694E3d329C0",
+      "impl": "0xD37C155Ec17D48fFeC60408D55e2b42121135CEE"
+    },
+    "STDealNote008": "0xFc1CfE6839c6B990aebee14067Ca1b36374922E6",
+    "SHTXUtilityToken": "0x0d4D32Df0b812Dfa9e9CB3C61f163fcffb91B261",
+    "STDealTrackRecord": "0x276fa235A5761805Ba3ac762e0926C64A69D463c",
+    "KhakiSolLoyalty": "0x72D408d6AC8508E445182390Bfe84A0a3577477b",
+    "STSpreadCollection": "0xDCBCA6F390B06988c0F9998E5F35C355ca354Ce8"
+  }
+}

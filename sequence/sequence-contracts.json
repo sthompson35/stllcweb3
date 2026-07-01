@@ -1,0 +1,87 @@
+{
+  "_comment": "Sequence Builder project #48396 — contract import manifest. Run prepare-import.js after deploy to populate addresses.",
+  "project": {
+    "id": 48396,
+    "name": "stllcweb3",
+    "url": "https://sequence.build/project/48396",
+    "contractsUrl": "https://sequence.build/project/48396/contracts"
+  },
+  "networks": {
+    "testnet": { "name": "Polygon Amoy", "chainId": 80002 },
+    "mainnet": { "name": "Polygon",      "chainId": 137   }
+  },
+  "contracts": [
+    {
+      "name": "STLLCEquityToken",
+      "label": "STLLC Equity Token",
+      "standard": "ERC-20",
+      "notes": "UUPS upgradeable proxy — import the PROXY address, not the implementation",
+      "abiFile": "./abis/STLLCEquityToken.json",
+      "roles": ["DEFAULT_ADMIN_ROLE", "COMPLIANCE_ROLE", "MANAGER_ROLE", "PAUSER_ROLE", "UPGRADER_ROLE"],
+      "addresses": {
+        "testnet": null,
+        "mainnet": null
+      }
+    },
+    {
+      "name": "STDealNote",
+      "label": "ST-DEAL-008 Note",
+      "standard": "ERC-20",
+      "notes": "Fixed-yield deal note — 1,290 tokens, $100 face, $106 repayment at maturity",
+      "abiFile": "./abis/STDealNote.json",
+      "roles": ["DEFAULT_ADMIN_ROLE", "COMPLIANCE_ROLE", "MANAGER_ROLE"],
+      "addresses": {
+        "testnet": null,
+        "mainnet": null
+      }
+    },
+    {
+      "name": "SHTXUtilityToken",
+      "label": "SHTX Utility Token",
+      "standard": "ERC-20",
+      "notes": "Loyalty utility token — 10M max supply, 10 SHTX per $1 KhakiSol purchase",
+      "abiFile": "./abis/SHTXUtilityToken.json",
+      "roles": ["DEFAULT_ADMIN_ROLE", "MINTER_ROLE", "PAUSER_ROLE"],
+      "addresses": {
+        "testnet": null,
+        "mainnet": null
+      }
+    },
+    {
+      "name": "STDealTrackRecord",
+      "label": "ST Deal Track Record",
+      "standard": "ERC-721",
+      "notes": "Soulbound NFT — locked after mint, one per closed deal",
+      "abiFile": "./abis/STDealTrackRecord.json",
+      "roles": ["DEFAULT_ADMIN_ROLE", "MINTER_ROLE", "VERIFIER_ROLE"],
+      "addresses": {
+        "testnet": null,
+        "mainnet": null
+      }
+    },
+    {
+      "name": "KhakiSolLoyalty",
+      "label": "KhakiSol Loyalty",
+      "standard": "ERC-1155",
+      "notes": "Multi-token loyalty — IDs 1-5 are badges, ID 6+ are product NFTs with 5% ERC-2981 royalty",
+      "abiFile": "./abis/KhakiSolLoyalty.json",
+      "roles": ["DEFAULT_ADMIN_ROLE", "MINTER_ROLE", "PAUSER_ROLE"],
+      "addresses": {
+        "testnet": null,
+        "mainnet": null
+      }
+    }
+    ,{
+      "name": "STSpreadCollection",
+      "label": "ST Spread Collection",
+      "standard": "ERC-1155",
+      "notes": "15-token spread collection: IDs 1-5 deal note NFTs (USDC yield, Reg D), IDs 6-10 KhakiSol product NFTs (5% royalty), IDs 11-15 spread badges (SHTX accrual + transfer cooldown)",
+      "abiFile": "./abis/STSpreadCollection.json",
+      "roles": ["DEFAULT_ADMIN_ROLE", "MANAGER_ROLE", "COMPLIANCE_ROLE", "MINTER_ROLE", "PAUSER_ROLE"],
+      "addresses": {
+        "testnet": null,
+        "mainnet": null
+      }
+    }
+  ]
+}

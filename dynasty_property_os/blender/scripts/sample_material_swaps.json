@@ -1,0 +1,7 @@
+{
+  "swaps": [
+    {"object_name_contains":"FLOOR", "material_name":"Premium Waterproof LVP", "color":"#8c6239"},
+    {"object_name_contains":"ROOF", "material_name":"Standing Seam Metal Roof", "color":"#20242a"},
+    {"object_name_contains":"WALL", "material_name":"Investor Grade Interior Paint", "color":"#f5f1e8"}
+  ]
+}

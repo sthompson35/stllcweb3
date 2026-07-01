@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="0 0 600 600">
+  <defs>
+    <radialGradient id="bgBadge" cx="50%" cy="45%" r="60%">
+      <stop offset="0%" style="stop-color:#0a0a12;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#020208;stop-opacity:1" />
+    </radialGradient>
+    <radialGradient id="hexFill" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" style="stop-color:#cd7f32;stop-opacity:0.35" />
+      <stop offset="100%" style="stop-color:#a0522d;stop-opacity:0.15" />
+    </radialGradient>
+    <filter id="hexGlow">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="textGlow">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <clipPath id="clipB"><rect width="600" height="600" rx="24"/></clipPath>
+  </defs>
+  <rect width="600" height="600" rx="24" fill="url(#bgBadge)"/>
+  <g clip-path="url(#clipB)">
+  <circle cx="300" cy="275" r="220" fill="#cd7f32" opacity="0.04"/>
+  <circle cx="300" cy="275" r="140" fill="#cd7f32" opacity="0.06"/>
+  <circle cx="0" cy="50" r="0.5" fill="#ffffff" opacity="0.10"/>
+  <circle cx="138" cy="147" r="1.0" fill="#ffffff" opacity="0.18"/>
+  <circle cx="275" cy="245" r="1.5" fill="#ffffff" opacity="0.26"/>
+  <circle cx="413" cy="342" r="0.5" fill="#ffffff" opacity="0.34"/>
+  <circle cx="550" cy="439" r="1.0" fill="#ffffff" opacity="0.10"/>
+  <circle cx="88" cy="537" r="1.5" fill="#ffffff" opacity="0.18"/>
+  <circle cx="225" cy="74" r="0.5" fill="#ffffff" opacity="0.26"/>
+  <circle cx="363" cy="171" r="1.0" fill="#ffffff" opacity="0.34"/>
+  <circle cx="500" cy="268" r="1.5" fill="#ffffff" opacity="0.10"/>
+  <circle cx="38" cy="366" r="0.5" fill="#ffffff" opacity="0.18"/>
+  <circle cx="175" cy="463" r="1.0" fill="#ffffff" opacity="0.26"/>
+  <circle cx="313" cy="0" r="1.5" fill="#ffffff" opacity="0.34"/>
+  <circle cx="450" cy="98" r="0.5" fill="#ffffff" opacity="0.10"/>
+  <circle cx="588" cy="195" r="1.0" fill="#ffffff" opacity="0.18"/>
+  <circle cx="125" cy="292" r="1.5" fill="#ffffff" opacity="0.26"/>
+  <circle cx="263" cy="390" r="0.5" fill="#ffffff" opacity="0.34"/>
+  <circle cx="400" cy="487" r="1.0" fill="#ffffff" opacity="0.10"/>
+  <circle cx="538" cy="24" r="1.5" fill="#ffffff" opacity="0.18"/>
+  <circle cx="75" cy="121" r="0.5" fill="#ffffff" opacity="0.26"/>
+  <circle cx="213" cy="219" r="1.0" fill="#ffffff" opacity="0.34"/>
+  <circle cx="350" cy="316" r="1.5" fill="#ffffff" opacity="0.10"/>
+  <circle cx="488" cy="413" r="0.5" fill="#ffffff" opacity="0.18"/>
+  <circle cx="25" cy="511" r="1.0" fill="#ffffff" opacity="0.26"/>
+  <circle cx="163" cy="48" r="1.5" fill="#ffffff" opacity="0.34"/>
+  <circle cx="300" cy="145" r="0.5" fill="#ffffff" opacity="0.10"/>
+  <circle cx="438" cy="243" r="1.0" fill="#ffffff" opacity="0.18"/>
+  <circle cx="575" cy="340" r="1.5" fill="#ffffff" opacity="0.26"/>
+  <circle cx="113" cy="437" r="0.5" fill="#ffffff" opacity="0.34"/>
+  <circle cx="250" cy="534" r="1.0" fill="#ffffff" opacity="0.10"/>
+  <circle cx="388" cy="72" r="1.5" fill="#ffffff" opacity="0.18"/>
+  <circle cx="525" cy="169" r="0.5" fill="#ffffff" opacity="0.26"/>
+  <circle cx="63" cy="266" r="1.0" fill="#ffffff" opacity="0.34"/>
+  <circle cx="200" cy="364" r="1.5" fill="#ffffff" opacity="0.10"/>
+  <circle cx="338" cy="461" r="0.5" fill="#ffffff" opacity="0.18"/>
+  <circle cx="475" cy="558" r="1.0" fill="#ffffff" opacity="0.26"/>
+  <circle cx="13" cy="96" r="1.5" fill="#ffffff" opacity="0.34"/>
+  <circle cx="150" cy="193" r="0.5" fill="#ffffff" opacity="0.10"/>
+  <circle cx="288" cy="290" r="1.0" fill="#ffffff" opacity="0.18"/>
+  <circle cx="425" cy="387" r="1.5" fill="#ffffff" opacity="0.26"/>
+  <circle cx="563" cy="485" r="0.5" fill="#ffffff" opacity="0.34"/>
+  <circle cx="488.0" cy="275.0" r="3" fill="#cd7f32" opacity="0.8"/>
+  <circle cx="462.8" cy="369.0" r="1.5" fill="#cd7f32" opacity="0.4"/>
+  <circle cx="394.0" cy="437.8" r="1.5" fill="#cd7f32" opacity="0.4"/>
+  <circle cx="300.0" cy="463.0" r="3" fill="#cd7f32" opacity="0.8"/>
+  <circle cx="206.0" cy="437.8" r="1.5" fill="#cd7f32" opacity="0.4"/>
+  <circle cx="137.2" cy="369.0" r="1.5" fill="#cd7f32" opacity="0.4"/>
+  <circle cx="112.0" cy="275.0" r="3" fill="#cd7f32" opacity="0.8"/>
+  <circle cx="137.2" cy="181.0" r="1.5" fill="#cd7f32" opacity="0.4"/>
+  <circle cx="206.0" cy="112.2" r="1.5" fill="#cd7f32" opacity="0.4"/>
+  <circle cx="300.0" cy="87.0" r="3" fill="#cd7f32" opacity="0.8"/>
+  <circle cx="394.0" cy="112.2" r="1.5" fill="#cd7f32" opacity="0.4"/>
+  <circle cx="462.8" cy="181.0" r="1.5" fill="#cd7f32" opacity="0.4"/>
+  <polygon points="438.6,195.0 438.6,355.0 300.0,435.0 161.4,355.0 161.4,195.0 300.0,115.0" fill="#cd7f32" opacity="0.08" filter="url(#hexGlow)"/>
+  <polygon points="438.6,195.0 438.6,355.0 300.0,435.0 161.4,355.0 161.4,195.0 300.0,115.0" fill="url(#hexFill)" stroke="#cd7f32" stroke-width="3" opacity="0.9"/>
+  <polygon points="428.2,201.0 428.2,349.0 300.0,423.0 171.8,349.0 171.8,201.0 300.0,127.0" fill="none" stroke="#cd7f32" stroke-width="1" opacity="0.4"/>
+  <text x="300" y="190" font-family="Arial Black,sans-serif" font-size="18" fill="#cd7f32" text-anchor="middle" font-weight="900" letter-spacing="10" filter="url(#textGlow)">SPREAD</text>
+  <line x1="220" y1="200" x2="380" y2="200" stroke="#cd7f32" stroke-width="1" opacity="0.5"/>
+  <text x="300" y="268" font-family="Arial Black,sans-serif" font-size="52" fill="#cd7f32" text-anchor="middle" font-weight="900" letter-spacing="2" filter="url(#textGlow)">BRONZE</text>
+  <text x="300" y="300" font-family="Arial,sans-serif" font-size="14" fill="#cd7f32" text-anchor="middle" opacity="0.6">&#9670;&#9670;&#9670;</text>
+  <text x="300" y="338" font-family="'Courier New',monospace" font-size="13" fill="#cd7f32" text-anchor="middle" opacity="0.85" letter-spacing="1">5 SHTX / DAY</text>
+  <text x="300" y="362" font-family="'Courier New',monospace" font-size="10" fill="#cd7f32" text-anchor="middle" opacity="0.5">TOKEN #011</text>
+  <text x="300" y="475" font-family="Arial Black,sans-serif" font-size="22" fill="#ffffff" text-anchor="middle" font-weight="900" opacity="0.9" letter-spacing="6">STLLC</text>
+  <text x="300" y="498" font-family="Arial,sans-serif" font-size="11" fill="#555577" text-anchor="middle" letter-spacing="3">INVESTOR BADGE</text>
+  <rect x="90" y="518" width="180" height="32" rx="16" fill="#cd7f32" opacity="0.12"/>
+  <rect x="90" y="518" width="180" height="32" rx="16" fill="none" stroke="#cd7f32" stroke-width="1" opacity="0.3"/>
+  <text x="180" y="539" font-family="'Courier New',monospace" font-size="10" fill="#cd7f32" text-anchor="middle">POLYGON</text>
+  <rect x="330" y="518" width="180" height="32" rx="16" fill="#cd7f32" opacity="0.12"/>
+  <rect x="330" y="518" width="180" height="32" rx="16" fill="none" stroke="#cd7f32" stroke-width="1" opacity="0.3"/>
+  <text x="420" y="539" font-family="'Courier New',monospace" font-size="10" fill="#cd7f32" text-anchor="middle">ERC-1155</text>
+  <rect x="0" y="575" width="600" height="2" fill="#cd7f32" opacity="0.3"/>
+  </g>
+</svg>

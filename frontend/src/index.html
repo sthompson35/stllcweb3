@@ -1,0 +1,3206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>stllcweb3 — Operations Dashboard</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+:root {
+  --ink:    #0a0a0a;
+  --paper:  #f5f3ef;
+  --ghost:  #e8e5df;
+  --mist:   #c8c4bc;
+  --steel:  #6b6860;
+  --teal:   #0d7a5f;
+  --teal2:  #0a6450;
+  --amber:  #c47c20;
+  --red:    #c0392b;
+  --blue:   #1a5276;
+  --mono:   'IBM Plex Mono', monospace;
+  --sans:   'Syne', sans-serif;
+  --r:      6px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--sans);
+  background: var(--paper);
+  color: var(--ink);
+  min-height: 100vh;
+  line-height: 1.5;
+}
+
+/* ── Layout ── */
+.shell { display: grid; grid-template-columns: 220px 1fr; min-height: 100vh; }
+
+/* ── Sidebar ── */
+.sidebar {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 24px 0;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.sidebar-brand {
+  padding: 0 20px 24px;
+  border-bottom: 1px solid #222;
+}
+
+.sidebar-brand .name {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #fff;
+}
+
+.sidebar-brand .sub {
+  font-size: 10px;
+  font-family: var(--mono);
+  color: #666;
+  margin-top: 2px;
+  letter-spacing: 0.06em;
+}
+
+.net-badge {
+  display: inline-block;
+  font-size: 9px;
+  font-family: var(--mono);
+  background: var(--teal);
+  color: #fff;
+  padding: 2px 7px;
+  border-radius: 20px;
+  margin-top: 8px;
+  letter-spacing: 0.04em;
+}
+
+.nav { padding: 16px 0; flex: 1; }
+
+.nav-section {
+  font-size: 9px;
+  font-family: var(--mono);
+  color: #555;
+  letter-spacing: 0.1em;
+  padding: 12px 20px 4px;
+  text-transform: uppercase;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 20px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #aaa;
+  cursor: pointer;
+  transition: all 0.15s;
+  border-left: 2px solid transparent;
+}
+
+.nav-item:hover { color: #fff; background: #111; }
+.nav-item.active { color: var(--teal); border-left-color: var(--teal); background: #0d1a17; }
+
+.nav-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.sidebar-foot {
+  padding: 16px 20px;
+  border-top: 1px solid #1a1a1a;
+}
+
+.wallet-chip {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: #555;
+  background: #111;
+  border: 1px solid #222;
+  border-radius: var(--r);
+  padding: 6px 10px;
+}
+
+.wallet-chip .addr { color: var(--teal); }
+
+/* ── Main ── */
+.main { padding: 32px 36px; overflow-x: hidden; }
+
+.page-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 28px;
+}
+
+.page-title { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; }
+.page-sub   { font-size: 12px; color: var(--steel); margin-top: 3px; font-family: var(--mono); }
+
+.btn {
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: var(--r);
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s;
+  letter-spacing: 0.02em;
+}
+
+.btn-primary   { background: var(--teal); color: #fff; }
+.btn-primary:hover { background: var(--teal2); }
+.btn-outline   { background: transparent; color: var(--ink); border: 1.5px solid var(--ghost); }
+.btn-outline:hover { border-color: var(--mist); background: var(--ghost); }
+.btn-sm { font-size: 11px; padding: 5px 10px; }
+.btn-danger { background: var(--red); color: #fff; }
+
+/* ── Stat cards ── */
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 28px; }
+
+.stat-card {
+  background: #fff;
+  border: 1px solid var(--ghost);
+  border-radius: var(--r);
+  padding: 16px 18px;
+}
+
+.stat-label { font-size: 10px; font-family: var(--mono); color: var(--steel); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 6px; }
+.stat-value { font-size: 24px; font-weight: 800; letter-spacing: -0.03em; }
+.stat-sub   { font-size: 11px; color: var(--steel); margin-top: 3px; }
+.stat-up    { color: var(--teal); }
+.stat-down  { color: var(--red); }
+
+/* ── Sections ── */
+.section { margin-bottom: 28px; }
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.section-title { font-size: 14px; font-weight: 700; letter-spacing: -0.01em; }
+
+/* ── Contract cards ── */
+.contract-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+.contract-card {
+  background: #fff;
+  border: 1px solid var(--ghost);
+  border-radius: var(--r);
+  overflow: hidden;
+}
+
+.contract-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--ghost);
+}
+
+.contract-name { font-size: 13px; font-weight: 700; }
+.contract-type { font-size: 9px; font-family: var(--mono); letter-spacing: 0.06em; }
+
+.standard-badge {
+  font-size: 9px;
+  font-family: var(--mono);
+  padding: 3px 8px;
+  border-radius: 20px;
+  font-weight: 500;
+}
+
+.badge-erc20    { background: #e8f5f1; color: var(--teal); }
+.badge-erc721   { background: #eef2fb; color: var(--blue); }
+.badge-erc1155  { background: #fdf3e3; color: var(--amber); }
+
+.contract-body { padding: 14px 16px; }
+
+.contract-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0;
+  font-size: 12px;
+  border-bottom: 1px solid var(--ghost);
+}
+.contract-row:last-child { border: none; }
+.contract-row .k { color: var(--steel); }
+.contract-row .v { font-family: var(--mono); font-weight: 500; font-size: 11px; }
+.contract-row .v.addr { color: var(--teal); }
+
+.contract-actions { padding: 12px 16px; border-top: 1px solid var(--ghost); display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* ── Deal pipeline table ── */
+.table-wrap {
+  background: #fff;
+  border: 1px solid var(--ghost);
+  border-radius: var(--r);
+  overflow: hidden;
+}
+
+table { width: 100%; border-collapse: collapse; }
+thead { background: var(--paper); }
+th {
+  text-align: left;
+  font-size: 10px;
+  font-family: var(--mono);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--steel);
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--ghost);
+}
+td {
+  font-size: 12px;
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--ghost);
+  vertical-align: middle;
+}
+tr:last-child td { border: none; }
+tr:hover td { background: var(--paper); }
+
+.pill {
+  display: inline-block;
+  font-size: 9px;
+  font-family: var(--mono);
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.pill-active   { background: #e8f5f1; color: var(--teal2); }
+.pill-pending  { background: #fdf3e3; color: var(--amber); }
+.pill-closed   { background: var(--ghost); color: var(--steel); }
+.pill-deployed { background: #eef2fb; color: var(--blue); }
+
+/* ── Token distribution panel ── */
+.dist-panel {
+  background: var(--ink);
+  border-radius: var(--r);
+  padding: 20px 24px;
+  color: var(--paper);
+}
+
+.dist-title { font-size: 14px; font-weight: 700; margin-bottom: 16px; }
+
+.dist-bar-wrap { background: #1a1a1a; border-radius: 4px; height: 8px; margin: 8px 0; overflow: hidden; }
+.dist-bar { height: 100%; border-radius: 4px; background: var(--teal); transition: width 0.4s; }
+
+.dist-legend {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.dist-item { font-size: 12px; }
+.dist-item .dk { color: #666; font-family: var(--mono); font-size: 10px; margin-bottom: 2px; }
+.dist-item .dv { font-weight: 700; font-size: 16px; }
+
+/* ── Sequence integration panel ── */
+.seq-panel {
+  background: #fff;
+  border: 1.5px solid var(--teal);
+  border-radius: var(--r);
+  padding: 18px 20px;
+}
+
+.seq-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.seq-logo {
+  width: 28px; height: 28px;
+  background: var(--teal);
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 12px; color: #fff;
+}
+.seq-title { font-size: 13px; font-weight: 700; }
+.seq-sub   { font-size: 10px; color: var(--steel); font-family: var(--mono); }
+
+.seq-step {
+  display: flex;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--ghost);
+  font-size: 12px;
+  align-items: flex-start;
+}
+.seq-step:last-child { border: none; }
+.seq-num {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: var(--teal);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.seq-step-text { color: var(--steel); line-height: 1.5; }
+.seq-step-text strong { color: var(--ink); }
+
+/* ── Code block ── */
+.code-block {
+  background: #0d0d0d;
+  color: #a8e6cf;
+  font-family: var(--mono);
+  font-size: 11px;
+  border-radius: var(--r);
+  padding: 14px 16px;
+  overflow-x: auto;
+  line-height: 1.7;
+  margin-top: 8px;
+}
+.code-block .cm { color: #555; }
+.code-block .ck { color: #7ec8e3; }
+.code-block .cv { color: #ffcb6b; }
+.code-block .cs { color: #c3e88d; }
+
+/* ── Legal Architecture Stack ── */
+.layer-stack {
+  border: 1px solid var(--ghost);
+  border-radius: var(--r);
+  overflow: hidden;
+  background: #fff;
+}
+
+.layer-row {
+  display: grid;
+  grid-template-columns: 28px 180px 1fr auto;
+  align-items: center;
+  gap: 0;
+  border-bottom: 1px solid var(--ghost);
+  transition: background 0.12s;
+}
+.layer-row:last-child { border: none; }
+.layer-row:hover { background: var(--paper); }
+
+.layer-num {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--mist);
+  padding: 14px 0 14px 16px;
+  font-weight: 600;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+}
+
+.layer-name {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 14px 12px 14px 10px;
+  letter-spacing: -0.01em;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  border-right: 1px solid var(--ghost);
+}
+
+.layer-desc {
+  padding: 12px 16px;
+  font-size: 11px;
+  color: var(--steel);
+  line-height: 1.55;
+}
+.layer-desc strong { color: var(--ink); font-weight: 600; }
+
+.layer-tag {
+  padding: 14px 16px 14px 0;
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--mist);
+  letter-spacing: 0.05em;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* foundation layers get a left accent */
+.layer-row.layer-legal .layer-num,
+.layer-row.layer-legal .layer-name { color: var(--amber); }
+.layer-row.layer-legal { border-left: 3px solid var(--amber); }
+
+.layer-row.layer-token .layer-num,
+.layer-row.layer-token .layer-name { color: var(--teal); }
+.layer-row.layer-token { border-left: 3px solid var(--teal); }
+
+.layer-row.layer-market .layer-num,
+.layer-row.layer-market .layer-name { color: var(--blue); }
+.layer-row.layer-market { border-left: 3px solid var(--blue); }
+
+/* ── Contract layer badge ── */
+.layer-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 9px;
+  font-family: var(--mono);
+  padding: 2px 8px;
+  border-radius: 20px;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+}
+.lbadge-legal  { background: #fdf3e3; color: var(--amber); }
+.lbadge-token  { background: #e8f5f1; color: var(--teal2); }
+.lbadge-market { background: #eef2fb; color: var(--blue); }
+
+/* ── SEC notice ── */
+.sec-notice {
+  background: #fdf3e3;
+  border: 1px solid #f0c070;
+  border-radius: var(--r);
+  padding: 10px 14px;
+  font-size: 11px;
+  color: #7a4e10;
+  font-family: var(--mono);
+  line-height: 1.5;
+  margin: 0 16px 14px;
+}
+.sec-notice strong { font-weight: 700; color: var(--amber); }
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .shell { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+  .stats { grid-template-columns: 1fr 1fr; }
+  .contract-grid { grid-template-columns: 1fr; }
+}
+</style>
+<script src="https://cdn.ethers.io/lib/ethers-5.7.umd.min.js" type="application/javascript"></script>
+<script src="https://cdn.jsdelivr.net/npm/@web3auth/modal@9/dist/modal.umd.min.js"></script>
+</head>
+<body>
+
+<div class="shell">
+
+<!-- ── Sidebar ── -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="name">stllcweb3</div>
+    <div class="sub">SHYLOW THOMPSON LLC</div>
+    <div class="net-badge">POLYGON AMOY TESTNET</div>
+  </div>
+
+  <nav class="nav">
+    <div class="nav-section">Overview</div>
+    <div class="nav-item active" onclick="showPage('dashboard')">
+      <span class="nav-dot"></span> Dashboard
+    </div>
+    <div class="nav-item" onclick="showPage('contracts')">
+      <span class="nav-dot"></span> Contracts
+    </div>
+
+    <div class="nav-section">Operations</div>
+    <div class="nav-item" onclick="showPage('deals')">
+      <span class="nav-dot"></span> Deal Pipeline
+    </div>
+    <div class="nav-item" onclick="showPage('investors')">
+      <span class="nav-dot"></span> Investor Cap Table
+    </div>
+    <div class="nav-item" onclick="showPage('distributions')">
+      <span class="nav-dot"></span> Distributions
+    </div>
+
+    <div class="nav-section">Products</div>
+    <div class="nav-item" onclick="showPage('khakisol')">
+      <span class="nav-dot"></span> KhakiSol Loyalty
+    </div>
+    <div class="nav-item" onclick="showPage('shtx')">
+      <span class="nav-dot"></span> SHTX Token
+    </div>
+
+    <div class="nav-section">Architecture</div>
+    <div class="nav-item" onclick="showPage('legalstack')">
+      <span class="nav-dot"></span> Legal Stack
+    </div>
+
+    <div class="nav-section">Tools</div>
+    <div class="nav-item" onclick="showPage('admin')">
+      <span class="nav-dot"></span> Admin Console
+    </div>
+    <div class="nav-item" onclick="showPage('sequence')">
+      <span class="nav-dot"></span> Sequence Builder
+    </div>
+    <div class="nav-item" onclick="showPage('deploy')">
+      <span class="nav-dot"></span> Deploy
+    </div>
+  </nav>
+
+  <div class="sidebar-foot">
+    <div class="wallet-chip" onclick="connectWallet()" style="cursor:pointer" title="Click to connect wallet">
+      <div style="font-size:9px;color:#444;margin-bottom:3px">CONNECTED WALLET</div>
+      <div class="addr" id="walletAddr">Click to connect</div>
+    </div>
+  </div>
+</aside>
+
+<!-- ── Main ── -->
+<main class="main">
+
+  <!-- DASHBOARD -->
+  <div id="page-dashboard">
+    <div class="page-head">
+      <div>
+        <div class="page-title">Operations Dashboard</div>
+        <div class="page-sub">Asset → Legal Wrapper → Rights Model → Token Standard → Compliance → Transfer Venue → Monetization</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-outline btn-sm" onclick="refreshData()">Refresh</button>
+        <button class="btn btn-primary btn-sm" onclick="showPage('deploy')">Deploy New</button>
+      </div>
+    </div>
+
+    <!-- Legal architecture stack — always visible, sets the frame -->
+    <div class="layer-stack" style="margin-bottom:24px">
+      <div class="layer-row layer-legal">
+        <div class="layer-num">01</div>
+        <div class="layer-name">Asset</div>
+        <div class="layer-desc"><strong>Missouri real property</strong> — the physical collateral. The token does not create or represent the property; it represents rights <em>in the legal wrapper that holds</em> the property.</div>
+        <div class="layer-tag">OFF-CHAIN</div>
+      </div>
+      <div class="layer-row layer-legal">
+        <div class="layer-num">02</div>
+        <div class="layer-name">Legal Wrapper</div>
+        <div class="layer-desc"><strong>Shylow Thompson LLC + SPV</strong> — Missouri entity, operating agreement, first-lien deed of trust. Authoritative source of all investor rights. The smart contract enforces a subset of this document on-chain.</div>
+        <div class="layer-tag">OFF-CHAIN</div>
+      </div>
+      <div class="layer-row layer-legal">
+        <div class="layer-num">03</div>
+        <div class="layer-name">Rights Model</div>
+        <div class="layer-desc"><strong>Equity</strong> (STLLC — LLC membership, profit share, governance) · <strong>Debt</strong> (ST-DEAL-008 — fixed-term bond, first-lien secured) · <strong>Utility</strong> (SHTX — no return, not a security). Each model carries distinct SEC obligations.</div>
+        <div class="layer-tag">LEGAL + CHAIN</div>
+      </div>
+      <div class="layer-row layer-token">
+        <div class="layer-num">04</div>
+        <div class="layer-name">Token Standard</div>
+        <div class="layer-desc"><strong>On-chain representation only.</strong> ERC-20 for equity and debt · ERC-721 soulbound for deal record · ERC-1155 for loyalty. The standard governs on-chain behavior; it does not create, define, or guarantee the underlying rights.</div>
+        <div class="layer-tag">ON-CHAIN</div>
+      </div>
+      <div class="layer-row layer-token">
+        <div class="layer-num">05</div>
+        <div class="layer-name">Compliance Layer</div>
+        <div class="layer-desc"><strong>Reg D 506(c)</strong> — accredited investors only, KYC whitelist enforced on every transfer in <code style="font-family:var(--mono);font-size:10px">_beforeTokenTransfer</code>. Human review of accreditation required before each <code style="font-family:var(--mono);font-size:10px">setWhitelist()</code> call. Form D must be filed within 15 days of first sale.</div>
+        <div class="layer-tag">ON-CHAIN</div>
+      </div>
+      <div class="layer-row layer-market">
+        <div class="layer-num">06</div>
+        <div class="layer-name">Transfer Venue</div>
+        <div class="layer-desc"><strong>Whitelist-gated P2P on Polygon</strong> + Sequence Builder for manager issuance. No public DEX — securities require a registered ATS or broker-dealer for secondary trading. Venue is a legal decision, not a technical one.</div>
+        <div class="layer-tag">CHAIN + LEGAL</div>
+      </div>
+      <div class="layer-row layer-market">
+        <div class="layer-num">07</div>
+        <div class="layer-name">Monetization Engine</div>
+        <div class="layer-desc"><strong>USDC accumulator</strong> (20% quarterly profit → <code style="font-family:var(--mono);font-size:10px">claimRewards()</code>) · <strong>Note repayment</strong> ($106/token at maturity) · <strong>SHTX utility</strong> (access, no return) · <strong>5% ERC-2981 royalty</strong> on product NFT secondary sales. Each engine is only as sound as layers 1–3 beneath it.</div>
+        <div class="layer-tag">ON-CHAIN USDC</div>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-label">STLLC Circulating</div>
+        <div class="stat-value" id="s-circulating">—</div>
+        <div class="stat-sub">of 2,000 investor tokens</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total Distributed</div>
+        <div class="stat-value stat-up" id="s-distributed">$0</div>
+        <div class="stat-sub">USDC to token holders</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Active Deal Notes</div>
+        <div class="stat-value" id="s-dealnotes">1</div>
+        <div class="stat-sub">ST-DEAL-008 live</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">SHTX Minted</div>
+        <div class="stat-value" id="s-shtx">—</div>
+        <div class="stat-sub">community tokens</div>
+      </div>
+    </div>
+
+    <!-- Token allocation bar -->
+    <div class="section">
+      <div class="section-head">
+        <div class="section-title">STLLC Token Allocation</div>
+      </div>
+      <div class="dist-panel">
+        <div class="dist-title">10,000 STLLC Total Supply</div>
+        <div style="font-size:11px;color:#666;font-family:var(--mono);margin-bottom:4px">Manager (80%) vs Investor Pool (20%)</div>
+        <div class="dist-bar-wrap">
+          <div class="dist-bar" style="width:80%"></div>
+        </div>
+        <div class="dist-legend">
+          <div class="dist-item">
+            <div class="dk">MANAGER RETAINED</div>
+            <div class="dv">8,000 STLLC</div>
+          </div>
+          <div class="dist-item">
+            <div class="dk">INVESTOR POOL</div>
+            <div class="dv">2,000 STLLC</div>
+          </div>
+          <div class="dist-item">
+            <div class="dk">TOKEN PRICE</div>
+            <div class="dv">$100 USDC</div>
+          </div>
+          <div class="dist-item">
+            <div class="dk">TARGET RAISE</div>
+            <div class="dv">$200,000</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick actions -->
+    <div class="section">
+      <div class="section-head">
+        <div class="section-title">Quick Actions</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+        <div class="contract-card" style="cursor:pointer" onclick="showDistModal()">
+          <div style="padding:16px">
+            <div style="font-size:12px;font-weight:700;margin-bottom:4px">Deposit Distribution</div>
+            <div style="font-size:11px;color:var(--steel)">Push quarterly USDC profit share to all token holders</div>
+            <button class="btn btn-primary btn-sm" style="margin-top:10px">Distribute →</button>
+          </div>
+        </div>
+        <div class="contract-card" style="cursor:pointer" onclick="showPage('investors')">
+          <div style="padding:16px">
+            <div style="font-size:12px;font-weight:700;margin-bottom:4px">Onboard Investor</div>
+            <div style="font-size:11px;color:var(--steel)">Whitelist wallet + issue STLLC or deal note tokens</div>
+            <button class="btn btn-outline btn-sm" style="margin-top:10px">Add Investor →</button>
+          </div>
+        </div>
+        <div class="contract-card" style="cursor:pointer" onclick="showPage('deals')">
+          <div style="padding:16px">
+            <div style="font-size:12px;font-weight:700;margin-bottom:4px">Close Deal Note</div>
+            <div style="font-size:11px;color:var(--steel)">Record sale proceeds and trigger note repayment</div>
+            <button class="btn btn-outline btn-sm" style="margin-top:10px">Close Deal →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTRACTS -->
+  <div id="page-contracts" style="display:none">
+    <div class="page-head">
+      <div>
+        <div class="page-title">Deployed Contracts</div>
+        <div class="page-sub">On-chain representations of rights defined in off-chain legal documents · Polygon Amoy testnet</div>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="importToSequence()">Import to Sequence</button>
+    </div>
+
+    <div class="contract-grid">
+      <div class="contract-card">
+        <div class="contract-header">
+          <div>
+            <div class="contract-name">STLLC Equity Token</div>
+            <div class="contract-type" style="color:var(--steel);margin-top:2px">Upgradeable (UUPS) · USDC Accumulator · On-chain Governance</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+            <span class="standard-badge badge-erc20">ERC-20</span>
+            <span class="layer-badge lbadge-token">LAYERS 4–5</span>
+          </div>
+        </div>
+        <div class="sec-notice">
+          <strong>SEC:</strong> This token represents fractional LLC membership — a security under Reg D 506(c). The token is the on-chain representation of rights defined in the STLLC Operating Agreement. The operating agreement is the authoritative document; this contract enforces a subset of it on-chain.
+        </div>
+        <div class="contract-body">
+          <div class="contract-row"><span class="k">Address</span><span class="v addr" id="addr-equity">Not deployed</span></div>
+          <div class="contract-row"><span class="k">Rights source</span><span class="v">STLLC Operating Agreement (off-chain)</span></div>
+          <div class="contract-row"><span class="k">Offering type</span><span class="v">Reg D 506(c) · Accredited only</span></div>
+          <div class="contract-row"><span class="k">Total Supply</span><span class="v">10,000 STLLC (Layer 4 representation)</span></div>
+          <div class="contract-row"><span class="k">Compliance</span><span class="v">KYC whitelist on every transfer</span></div>
+          <div class="contract-row"><span class="k">Distribution</span><span class="v">USDC accumulator · pendingSettled preserved</span></div>
+          <div class="contract-row"><span class="k">Governance</span><span class="v">On-chain proposals (extraordinary matters)</span></div>
+        </div>
+        <div class="contract-actions">
+          <button class="btn btn-primary btn-sm" onclick="copyAddr('addr-equity')">Copy Address</button>
+          <button class="btn btn-outline btn-sm" onclick="showPage('distributions')">Distributions →</button>
+          <button class="btn btn-outline btn-sm" onclick="openPolygonscan('equity')">Polygonscan ↗</button>
+        </div>
+      </div>
+
+      <div class="contract-card">
+        <div class="contract-header">
+          <div>
+            <div class="contract-name">ST Deal Note #8</div>
+            <div class="contract-type" style="color:var(--steel);margin-top:2px">Fixed-term debt obligation · 142 Ridgewood Dr · first-lien secured</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+            <span class="standard-badge badge-erc20">ERC-20</span>
+            <span class="layer-badge lbadge-token">LAYERS 4–5</span>
+          </div>
+        </div>
+        <div class="sec-notice">
+          <strong>SEC:</strong> This token represents a debt obligation — a security under Reg D 506(c). The promissory note and deed of trust are the authoritative legal documents. The token automates repayment administration; it does not create the debt obligation or the lien.
+        </div>
+        <div class="contract-body">
+          <div class="contract-row"><span class="k">Address</span><span class="v addr" id="addr-note">Not deployed</span></div>
+          <div class="contract-row"><span class="k">Rights source</span><span class="v">Promissory note + first-lien deed of trust</span></div>
+          <div class="contract-row"><span class="k">Offering type</span><span class="v">Reg D 506(c) · Accredited only</span></div>
+          <div class="contract-row"><span class="k">Principal</span><span class="v">$129,000 (1,290 tokens × $100 face)</span></div>
+          <div class="contract-row"><span class="k">Repayment</span><span class="v">$106 / token · 6% over 6 months · 12% APY</span></div>
+          <div class="contract-row"><span class="k">Maturity</span><span class="v">180 days post-deploy · triggered by property sale</span></div>
+        </div>
+        <div class="contract-actions">
+          <button class="btn btn-primary btn-sm" onclick="showPage('deals')">Issue Tokens →</button>
+          <button class="btn btn-outline btn-sm" onclick="showRepayModal()">Repay Note →</button>
+          <button class="btn btn-outline btn-sm" onclick="openPolygonscan('note')">Polygonscan ↗</button>
+        </div>
+      </div>
+
+      <div class="contract-card">
+        <div class="contract-header">
+          <div>
+            <div class="contract-name">SHTX Utility Token</div>
+            <div class="contract-type" style="color:var(--steel);margin-top:2px">Community access utility · no return expectation · NOT a security</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+            <span class="standard-badge badge-erc20">ERC-20</span>
+            <span class="layer-badge lbadge-market">LAYER 7</span>
+          </div>
+        </div>
+        <div class="contract-body">
+          <div class="contract-row"><span class="k">Address</span><span class="v addr" id="addr-shtx">Not deployed</span></div>
+          <div class="contract-row"><span class="k">Rights type</span><span class="v">Utility — platform access, no investment return</span></div>
+          <div class="contract-row"><span class="k">SEC treatment</span><span class="v">Not a security (no profit expectation)</span></div>
+          <div class="contract-row"><span class="k">Max Supply</span><span class="v">10,000,000 SHTX</span></div>
+          <div class="contract-row"><span class="k">Earn rate</span><span class="v">10 SHTX per $1 KhakiSol purchase</span></div>
+          <div class="contract-row"><span class="k">Tiers</span><span class="v">Scout (100) → Operator (500) → Trooper (2K) → Commander (5K)</span></div>
+        </div>
+        <div class="contract-actions">
+          <button class="btn btn-primary btn-sm" onclick="showPage('shtx')">Mint Reward →</button>
+          <button class="btn btn-outline btn-sm" onclick="showPage('shtx')">Get Tier →</button>
+          <button class="btn btn-outline btn-sm" onclick="openPolygonscan('shtx')">Polygonscan ↗</button>
+        </div>
+      </div>
+
+      <div class="contract-card">
+        <div class="contract-header">
+          <div>
+            <div class="contract-name">ST Deal Track Record</div>
+            <div class="contract-type" style="color:var(--steel);margin-top:2px">On-chain record of off-chain legal close · ERC-5192 soulbound</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+            <span class="standard-badge badge-erc721">ERC-721</span>
+            <span class="layer-badge lbadge-legal">LAYERS 2–3</span>
+          </div>
+        </div>
+        <div class="contract-body">
+          <div class="contract-row"><span class="k">Address</span><span class="v addr" id="addr-track">Not deployed</span></div>
+          <div class="contract-row"><span class="k">Purpose</span><span class="v">Bridges off-chain close to on-chain record</span></div>
+          <div class="contract-row"><span class="k">Soulbound</span><span class="v">Non-transferable — permanently attached to manager wallet</span></div>
+          <div class="contract-row"><span class="k">Verification</span><span class="v">Title company wallet countersigns (VERIFIER_ROLE)</span></div>
+          <div class="contract-row"><span class="k">Data stored</span><span class="v">Property, price, ARV, profit, IPFS closing docs</span></div>
+        </div>
+        <div class="contract-actions">
+          <button class="btn btn-primary btn-sm" onclick="showCallModal('mintDealRecord','STDealTrackRecord',{'recipient':'manager wallet','tokenURI':'ipfs://Qm...','dealId':'ST-DEAL-00X'})">Mint Deal Record</button>
+          <button class="btn btn-outline btn-sm" onclick="showCallModal('verifyDeal','STDealTrackRecord',{'tokenId':'0','role':'VERIFIER_ROLE required'})">Verify (Title Co.)</button>
+          <button class="btn btn-outline btn-sm" onclick="openPolygonscan('track')">Polygonscan ↗</button>
+        </div>
+      </div>
+
+      <div class="contract-card" style="grid-column:1/-1">
+        <div class="contract-header">
+          <div>
+            <div class="contract-name">KhakiSol Loyalty</div>
+            <div class="contract-type" style="color:var(--steel);margin-top:2px">Multi-token loyalty rewards · badges + product NFTs · 5% ERC-2981 royalty · NOT a security</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span class="layer-badge lbadge-market">LAYER 7</span>
+            <span class="standard-badge badge-erc1155">ERC-1155</span>
+          </div>
+        </div>
+        <div class="contract-body" style="display:grid;grid-template-columns:1fr 1fr;gap:0">
+          <div>
+            <div class="contract-row"><span class="k">Address</span><span class="v addr" id="addr-loyalty">Not deployed</span></div>
+            <div class="contract-row"><span class="k">Rights type</span><span class="v">Loyalty utility · no investment return</span></div>
+            <div class="contract-row"><span class="k">Token ID 0</span><span class="v">SHTX currency (fungible, Layer 7)</span></div>
+            <div class="contract-row"><span class="k">Token ID 1–4</span><span class="v">Scout / Operator / Trooper / Commander badges</span></div>
+          </div>
+          <div>
+            <div class="contract-row"><span class="k">Token ID 5</span><span class="v">Founding Member (100 max, commemorative)</span></div>
+            <div class="contract-row"><span class="k">Token ID 6+</span><span class="v">Product Edition NFTs (limited drops)</span></div>
+            <div class="contract-row"><span class="k">Royalty</span><span class="v">5% ERC-2981 on secondary product NFT sales</span></div>
+            <div class="contract-row"><span class="k">Trigger</span><span class="v">Shopify webhook → n8n → mintBadge()</span></div>
+          </div>
+        </div>
+        <div class="contract-actions">
+          <button class="btn btn-primary btn-sm" onclick="showPage('khakisol')">Mint Badge →</button>
+          <button class="btn btn-outline btn-sm" onclick="showPage('khakisol')">Create Drop →</button>
+          <button class="btn btn-outline btn-sm" onclick="showPage('khakisol')">Batch Airdrop →</button>
+          <button class="btn btn-outline btn-sm" onclick="showPage('khakisol')">Founding Member →</button>
+          <button class="btn btn-outline btn-sm" onclick="openPolygonscan('loyalty')">Polygonscan ↗</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DEALS -->
+  <div id="page-deals" style="display:none">
+    <div class="page-head">
+      <div>
+        <div class="page-title">Deal Pipeline</div>
+        <div class="page-sub">Missouri real property deals · promissory notes + deeds of trust are primary · tokens are Layer 4 representations</div>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="showPage('deploy')">Deploy New Note</button>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Deal ID</th><th>Property</th><th>County</th><th>Type</th>
+            <th>Purchase</th><th>ARV</th><th>Status</th><th>Note</th><th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code style="font-family:var(--mono);font-size:11px">ST-008</code></td>
+            <td>142 Ridgewood Dr, De Soto MO<br><span style="font-size:10px;color:var(--steel);font-family:var(--mono)">1,290 tokens · $100 face · $106 repay</span></td>
+            <td>Jefferson</td>
+            <td>Fix + Flip</td>
+            <td>$87,000</td>
+            <td>$195,000</td>
+            <td><span class="pill pill-active">ACTIVE</span></td>
+            <td><span class="pill pill-deployed">NOTE LIVE</span><br><span style="font-size:10px;color:var(--steel);font-family:var(--mono)">180 days · 12% APY</span></td>
+            <td style="display:flex;gap:6px;flex-wrap:wrap">
+              <button class="btn btn-outline btn-sm" onclick="showManageDeal('ST-008')">Manage</button>
+              <button class="btn btn-primary btn-sm" onclick="showRepayModal()">Repay →</button>
+            </td>
+          </tr>
+          <tr>
+            <td><code style="font-family:var(--mono);font-size:11px">ST-007</code></td>
+            <td>88 Oak Lane, Festus MO</td>
+            <td>Jefferson</td>
+            <td>Wholesale</td>
+            <td>$45,000</td>
+            <td>$95,000</td>
+            <td><span class="pill pill-closed">CLOSED</span></td>
+            <td><span class="pill">SBT MINTED</span></td>
+            <td><button class="btn btn-outline btn-sm" onclick="openPolygonscan('nft','ST-007')">View NFT ↗</button></td>
+          </tr>
+          <tr>
+            <td><code style="font-family:var(--mono);font-size:11px">ST-006</code></td>
+            <td>14 Creek Rd, Farmington MO</td>
+            <td>St. Francois</td>
+            <td>Land Flip</td>
+            <td>$12,000</td>
+            <td>$28,000</td>
+            <td><span class="pill pill-closed">CLOSED</span></td>
+            <td><span class="pill">SBT MINTED</span></td>
+            <td><button class="btn btn-outline btn-sm" onclick="openPolygonscan('nft','ST-006')">View NFT ↗</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- LEGAL ARCHITECTURE STACK -->
+  <div id="page-legalstack" style="display:none">
+    <div class="page-head">
+      <div>
+        <div class="page-title">Legal Architecture Stack</div>
+        <div class="page-sub">Asset → Legal Wrapper → Rights Model → Token Standard → Compliance → Transfer Venue → Monetization</div>
+      </div>
+      <span class="pill pill-pending" style="font-size:10px;padding:4px 10px">SEC: token ≠ asset</span>
+    </div>
+
+    <div class="sec-notice" style="margin:0 0 20px">
+      <strong>SEC Position (2023–2025):</strong> Tokenized securities are still securities. Tokenization does not change the underlying legal obligations, registration requirements, or investor protections. A token is the on-chain <em>representation</em> of rights that must already exist in valid off-chain legal documents. The asset, the legal wrapper, and the rights model must be established first — the token standard is layer 4 of 7, not layer 1.
+    </div>
+
+    <div class="section">
+      <div class="section-head"><div class="section-title">The Seven Layers — stllcweb3 Mapping</div></div>
+      <div class="layer-stack">
+
+        <div class="layer-row layer-legal">
+          <div class="layer-num">01</div>
+          <div class="layer-name">Asset</div>
+          <div class="layer-desc">
+            <strong>Missouri real property</strong> held by SPV. The physical asset is the foundation of all value. Tokenization does not create the asset — it already exists, encumbered by a first-lien deed of trust. ARV, purchase price, and rehab budget are physical-world facts, not on-chain ones.
+            <div style="margin-top:6px;font-family:var(--mono);font-size:10px;color:var(--mist)">142 Ridgewood Dr, De Soto MO 63020 · Jefferson County · ARV $195,000</div>
+          </div>
+          <div class="layer-tag">OFF-CHAIN<br>PHYSICAL</div>
+        </div>
+
+        <div class="layer-row layer-legal">
+          <div class="layer-num">02</div>
+          <div class="layer-name">Legal Wrapper</div>
+          <div class="layer-desc">
+            <strong>Shylow Thompson LLC</strong> is the Missouri entity that owns or controls the SPV holding the property. The operating agreement governs member rights, profit sharing, and decision authority. This document is the authoritative source of investor rights — the smart contract enforces a subset of it on-chain.
+            <div style="margin-top:6px;font-family:var(--mono);font-size:10px;color:var(--mist)">Missouri LLC · Operating Agreement · SPV per deal · First-lien deed of trust</div>
+          </div>
+          <div class="layer-tag">OFF-CHAIN<br>LEGAL</div>
+        </div>
+
+        <div class="layer-row layer-legal">
+          <div class="layer-num">03</div>
+          <div class="layer-name">Rights Model</div>
+          <div class="layer-desc">
+            <strong>What the token holder actually owns.</strong> Three distinct rights models exist in this stack: (a) <strong>Equity</strong> — fractional LLC membership with pro-rata profit distribution and governance votes (STLLC); (b) <strong>Debt</strong> — fixed-term bond obligation collateralized by property, repaid at maturity (ST-DEAL-008); (c) <strong>Utility</strong> — non-security access rights with no return expectation (SHTX). Each model has different SEC treatment.
+            <div style="margin-top:6px;font-family:var(--mono);font-size:10px;color:var(--mist)">Equity (Reg D 506c) · Debt (Reg D 506c) · Utility (not a security)</div>
+          </div>
+          <div class="layer-tag">OFF-CHAIN<br>+ ON-CHAIN</div>
+        </div>
+
+        <div class="layer-row layer-token">
+          <div class="layer-num">04</div>
+          <div class="layer-name">Token Standard</div>
+          <div class="layer-desc">
+            <strong>The on-chain representation only.</strong> ERC-20 for fungible equity and debt tokens; ERC-721 soulbound for deal track record; ERC-1155 for mixed loyalty tokens. The standard governs <em>how</em> the representation behaves on-chain — it does not create, define, or guarantee the underlying rights. If the off-chain legal documents are defective, the token is worthless regardless of the standard.
+            <div style="margin-top:6px;font-family:var(--mono);font-size:10px;color:var(--mist)">STLLC → ERC-20 · ST-NOTE → ERC-20 · STTR → ERC-721 (ERC-5192) · KhakiSol → ERC-1155</div>
+          </div>
+          <div class="layer-tag">ON-CHAIN<br>SOLIDITY</div>
+        </div>
+
+        <div class="layer-row layer-token">
+          <div class="layer-num">05</div>
+          <div class="layer-name">Compliance Layer</div>
+          <div class="layer-desc">
+            <strong>Reg D 506(c) — accredited investors only.</strong> Every transfer is gated by KYC whitelist enforced in <code style="font-family:var(--mono)">_beforeTokenTransfer</code>. The compliance layer sits between the rights model and the token mechanics: only verified, accredited investors may hold or receive security tokens. Whitelist state is managed by COMPLIANCE_ROLE, not automated — human review of accreditation is required before each approval.
+            <div style="margin-top:6px;font-family:var(--mono);font-size:10px;color:var(--mist)">setWhitelist() · COMPLIANCE_ROLE · No general solicitation without 506(c) filing · Form D</div>
+          </div>
+          <div class="layer-tag">ON-CHAIN<br>ENFORCED</div>
+        </div>
+
+        <div class="layer-row layer-market">
+          <div class="layer-num">06</div>
+          <div class="layer-name">Transfer Venue</div>
+          <div class="layer-desc">
+            <strong>Where and how tokens change hands.</strong> Whitelist-gated peer-to-peer transfers on Polygon (primary); Sequence Builder dashboard for manager-initiated issuance; no public DEX listing (securities require ATS or broker-dealer for secondary trading). Future secondary market requires a registered ATS or reliance on Rule 144 lockup periods. Venue choice is a legal decision, not a technical one.
+            <div style="margin-top:6px;font-family:var(--mono);font-size:10px;color:var(--mist)">Polygon · Sequence Builder · P2P whitelist-gated · No Uniswap · ATS required for secondary</div>
+          </div>
+          <div class="layer-tag">CHAIN +<br>LEGAL</div>
+        </div>
+
+        <div class="layer-row layer-market">
+          <div class="layer-num">07</div>
+          <div class="layer-name">Monetization Engine</div>
+          <div class="layer-desc">
+            <strong>How value flows to token holders.</strong> STLLC equity: USDC accumulator distributes 20% of quarterly net profit pro-rata, claimable via <code style="font-family:var(--mono)">claimRewards()</code>. Deal notes: lump-sum repayment at maturity via <code style="font-family:var(--mono)">depositRepayment()</code> / <code style="font-family:var(--mono)">redeem()</code>. SHTX: no financial return — loyalty discounts and platform access only. KhakiSol: 5% ERC-2981 royalty on secondary product NFT sales. Each engine is only as sound as layers 1–3 beneath it.
+            <div style="margin-top:6px;font-family:var(--mono);font-size:10px;color:var(--mist)">USDC accumulator · Note repayment · SHTX utility · ERC-2981 royalty</div>
+          </div>
+          <div class="layer-tag">ON-CHAIN<br>USDC</div>
+        </div>
+
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px">
+      <div class="dist-panel">
+        <div class="dist-title">The Critical Principle</div>
+        <div style="font-size:12px;color:#aaa;line-height:1.7">
+          The token does not create the right. The right must exist first — in a signed operating agreement, a recorded deed of trust, a promissory note, or an SEC-filed Form D. The smart contract automates the <em>administration</em> of those rights: transferring tokens, distributing USDC, enforcing whitelist gates. But if the off-chain documents are missing or defective, no amount of on-chain logic makes the token legitimate or the offering legal.
+          <div style="margin-top:14px;font-family:var(--mono);font-size:10px;color:#555;border-top:1px solid #222;padding-top:10px">
+            Layers 1–3 are established by attorneys, not developers.<br>
+            Layers 4–5 are implemented in Solidity.<br>
+            Layers 6–7 are configured per deal and per product.
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-title" style="margin-bottom:12px">Contract → Layer Mapping</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Contract</th><th>Primary Layer</th><th>Rights Type</th></tr></thead>
+            <tbody>
+              <tr><td><code style="font-family:var(--mono);font-size:11px">STLLCEquityToken</code></td><td><span class="layer-badge lbadge-token">LAYER 4–5</span></td><td>Equity / Reg D 506(c)</td></tr>
+              <tr><td><code style="font-family:var(--mono);font-size:11px">STDealNote</code></td><td><span class="layer-badge lbadge-token">LAYER 4–5</span></td><td>Debt / Reg D 506(c)</td></tr>
+              <tr><td><code style="font-family:var(--mono);font-size:11px">STDealTrackRecord</code></td><td><span class="layer-badge lbadge-legal">LAYER 2–3</span></td><td>Verification / Soulbound</td></tr>
+              <tr><td><code style="font-family:var(--mono);font-size:11px">SHTXUtilityToken</code></td><td><span class="layer-badge lbadge-market">LAYER 7</span></td><td>Utility / Not a security</td></tr>
+              <tr><td><code style="font-family:var(--mono);font-size:11px">KhakiSolLoyalty</code></td><td><span class="layer-badge lbadge-market">LAYER 7</span></td><td>Loyalty / ERC-2981</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="margin-top:12px;font-size:11px;color:var(--steel);font-family:var(--mono);line-height:1.6">
+          The STDealTrackRecord NFT is the only contract that touches Layer 2 — it creates an on-chain record of the off-chain legal close, countersigned by title company wallet.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEQUENCE BUILDER -->
+  <div id="page-sequence" style="display:none">
+    <div class="page-head">
+      <div>
+        <div class="page-title">Sequence Builder Integration</div>
+        <div class="page-sub">sequence.xyz — unified contract management + wallet infrastructure</div>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="window.open('https://sequence.build/project/48396','_blank')">Open Project #48396 ↗</button>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <div class="seq-panel">
+        <div class="seq-head">
+          <div class="seq-logo">S</div>
+          <div>
+            <div class="seq-title">Project #48396 — stllcweb3</div>
+            <div class="seq-sub"><a href="https://sequence.build/project/48396" target="_blank" style="color:var(--teal)">sequence.build/project/48396</a></div>
+          </div>
+        </div>
+        <div class="seq-step"><div class="seq-num">1</div><div class="seq-step-text">Project is live. Open <a href="https://sequence.build/project/48396/contracts" target="_blank" style="color:var(--teal)"><strong>Contracts</strong></a> and click <strong>Import existing contract</strong>. Paste each deployed address from the Contracts page of this dashboard.</div></div>
+        <div class="seq-step"><div class="seq-num">2</div><div class="seq-step-text">The ABI is fetched automatically for verified contracts. For unverified, paste the JSON from <code style="font-family:var(--mono);font-size:10px">artifacts/contracts/core/</code> in this repo.</div></div>
+        <div class="seq-step"><div class="seq-num">3</div><div class="seq-step-text">Open <a href="https://sequence.build/project/48396/embedded-wallet" target="_blank" style="color:var(--teal)"><strong>Embedded Wallet</strong></a> to configure gasless onboarding — investors sign in with email, no MetaMask required.</div></div>
+        <div class="seq-step"><div class="seq-num">4</div><div class="seq-step-text">Use the <strong>Contract Dashboard</strong> to call read/write functions, inspect balances, and replay transaction history without writing code.</div></div>
+        <div class="seq-step"><div class="seq-num">5</div><div class="seq-step-text">Grant n8n minter wallet <strong>MINTER_ROLE</strong> on KhakiSolLoyalty and SHTXUtilityToken via Admin Console → Role Management, then paste the wallet into <code style="font-family:var(--mono);font-size:10px">MINTER_KEY</code> in .env.</div></div>
+      </div>
+
+      <div>
+        <div class="section-title" style="margin-bottom:12px">n8n Automation → Sequence SDK</div>
+        <div class="code-block">
+<span class="cm">// n8n Code Node: KhakiSol purchase → SHTX mint</span>
+<span class="ck">const</span> { SequenceIndexer } = <span class="cs">require</span>(<span class="cv">'@0xsequence/indexer'</span>);
+<span class="ck">const</span> { ethers } = <span class="cs">require</span>(<span class="cv">'ethers'</span>);
+
+<span class="cm">// Triggered by Shopify webhook on order.paid</span>
+<span class="ck">const</span> orderAmount = $input.item.json.total_price; <span class="cm">// cents</span>
+<span class="ck">const</span> customerWallet = $input.item.json.note_attributes
+  .find(a => a.name === <span class="cv">'wallet'</span>)?.value;
+
+<span class="ck">if</span> (customerWallet) {
+  <span class="ck">const</span> provider = <span class="cs">new</span> ethers.providers.JsonRpcProvider(process.env.POLYGON_RPC);
+  <span class="ck">const</span> signer = <span class="cs">new</span> ethers.Wallet(process.env.MINTER_KEY, provider);
+  <span class="ck">const</span> loyalty = <span class="cs">new</span> ethers.Contract(
+    process.env.KHAKISOL_LOYALTY_ADDR, ABI, signer
+  );
+
+  <span class="cm">// 10 SHTX per $1 spent</span>
+  <span class="ck">const</span> shtxAmount = ethers.utils.parseEther(
+    String(Math.floor(orderAmount / 100 * 10))
+  );
+  <span class="ck">await</span> loyalty.mintSHTX(customerWallet, shtxAmount);
+}
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:16px 0 12px">
+          <a href="https://sequence.build/project/48396/contracts" target="_blank" style="text-decoration:none">
+            <div style="background:#0d1a17;border:1px solid var(--teal);border-radius:var(--r);padding:10px 14px;cursor:pointer">
+              <div style="font-size:10px;color:var(--teal);font-family:var(--mono);letter-spacing:0.06em">CONTRACTS</div>
+              <div style="font-size:11px;color:#888;margin-top:2px">Import &amp; call ↗</div>
+            </div>
+          </a>
+          <a href="https://sequence.build/project/48396/embedded-wallet" target="_blank" style="text-decoration:none">
+            <div style="background:#0d1a17;border:1px solid #222;border-radius:var(--r);padding:10px 14px;cursor:pointer">
+              <div style="font-size:10px;color:var(--teal);font-family:var(--mono);letter-spacing:0.06em">EMBEDDED WALLET</div>
+              <div style="font-size:11px;color:#888;margin-top:2px">Gasless onboarding ↗</div>
+            </div>
+          </a>
+          <a href="https://sequence.build/project/48396" target="_blank" style="text-decoration:none">
+            <div style="background:#0d1a17;border:1px solid #222;border-radius:var(--r);padding:10px 14px;cursor:pointer">
+              <div style="font-size:10px;color:var(--teal);font-family:var(--mono);letter-spacing:0.06em">DASHBOARD</div>
+              <div style="font-size:11px;color:#888;margin-top:2px">Project #48396 ↗</div>
+            </div>
+          </a>
+        </div>
+
+        <div class="section-title" style="margin-bottom:12px">Embedded Wallet Config</div>
+        <div class="code-block">
+<span class="cm">// sequence.js — gasless investor token distribution</span>
+<span class="ck">import</span> { SequenceKit } <span class="cs">from</span> <span class="cv">'@0xsequence/kit'</span>;
+
+<span class="cm">// Investor connects with email — no MetaMask needed</span>
+<span class="cm">// SEQUENCE_PROJECT_KEY from sequence.build/project/48396/settings</span>
+<span class="ck">const</span> config = {
+  defaultNetwork: <span class="cv">'polygon'</span>,
+  projectAccessKey: process.env.SEQUENCE_PROJECT_KEY, <span class="cm">// ≠ project ID (48396)</span>
+  signIn: { projectName: <span class="cv">'stllcweb3'</span> }
+};
+
+<span class="cm">// Manager distributes tokens — gasless via Sequence relayer</span>
+<span class="ck">await</span> equityToken.distributeInvestorTokens(
+  investorWallet,
+  ethers.utils.parseEther(<span class="cv">'100'</span>) <span class="cm">// 100 STLLC tokens</span>
+);
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DEPLOY -->
+  <div id="page-deploy" style="display:none">
+    <div class="page-head">
+      <div>
+        <div class="page-title">Deploy Contracts</div>
+        <div class="page-sub">Hardhat + Sequence Builder — VS Code: stllcweb3/</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <div>
+        <div class="section-title" style="margin-bottom:12px">Installation</div>
+        <div class="code-block">
+<span class="cm"># 1. Install dependencies</span>
+cd stllcweb3
+npm install
+
+<span class="cm"># 2. Copy env template</span>
+cp .env.example .env
+<span class="cm"># Fill in: DEPLOYER_PRIVATE_KEY, MANAGER_WALLET,</span>
+<span class="cm"># POLYGON_RPC_URL, POLYGONSCAN_API_KEY</span>
+
+<span class="cm"># 3. Run test suite (all 20 tests must pass)</span>
+npx hardhat test
+
+<span class="cm"># 4. Deploy to Amoy testnet</span>
+npx hardhat run scripts/deploy.js --network polygonAmoy
+
+<span class="cm"># 5. Verify on Polygonscan</span>
+npx hardhat verify --network polygonAmoy ADDR
+        </div>
+
+        <div class="section-title" style="margin:16px 0 12px">Environment Variables</div>
+        <div class="code-block">
+<span class="cm"># .env — never commit this file</span>
+DEPLOYER_PRIVATE_KEY=<span class="cv">0x...</span>
+MANAGER_WALLET=<span class="cv">0x...</span>
+POLYGON_RPC_URL=<span class="cv">https://rpc-amoy.polygon.technology</span>
+POLYGONSCAN_API_KEY=<span class="cv">your_key_here</span>
+SEQUENCE_PROJECT_KEY=<span class="cv">your_sequence_key</span>
+MINTER_KEY=<span class="cv">0x...</span>  <span class="cm"># n8n automation wallet</span>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-title" style="margin-bottom:12px">Security Checklist</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Check</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>ReentrancyGuard on all payable functions</td><td><span class="pill pill-active">PASS</span></td></tr>
+              <tr><td>Access control on all privileged functions</td><td><span class="pill pill-active">PASS</span></td></tr>
+              <tr><td>KYC whitelist enforced on all transfers</td><td><span class="pill pill-active">PASS</span></td></tr>
+              <tr><td>Emergency pause mechanism</td><td><span class="pill pill-active">PASS</span></td></tr>
+              <tr><td>UUPS upgrade restricted to UPGRADER_ROLE</td><td><span class="pill pill-active">PASS</span></td></tr>
+              <tr><td>Soulbound transfer block (ERC-5192)</td><td><span class="pill pill-active">PASS</span></td></tr>
+              <tr><td>SafeERC20 on all USDC transfers</td><td><span class="pill pill-active">PASS</span></td></tr>
+              <tr><td>Integer overflow (Solidity 0.8.24 native)</td><td><span class="pill pill-active">PASS</span></td></tr>
+              <tr><td>Flash loan governance protection (block snapshot)</td><td><span class="pill pill-active">PASS</span></td></tr>
+              <tr><td>Rate limiting on utility token minting</td><td><span class="pill pill-active">PASS</span></td></tr>
+              <tr><td>Pull pattern on reward claims (no push)</td><td><span class="pill pill-active">PASS</span></td></tr>
+              <tr><td>Manager excluded from investor USDC accumulator</td><td><span class="pill pill-active">FIXED</span></td></tr>
+              <tr><td>Pending rewards preserved through token transfers</td><td><span class="pill pill-active">FIXED</span></td></tr>
+              <tr><td>impliedAnnualYieldBps() safe after maturity</td><td><span class="pill pill-active">FIXED</span></td></tr>
+              <tr><td>Third-party audit (pre-mainnet)</td><td><span class="pill pill-pending">PENDING</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INVESTORS -->
+  <div id="page-investors" style="display:none">
+    <div class="page-head">
+      <div><div class="page-title">Investor Cap Table</div><div class="page-sub">Reg D 506(c) accredited investors only · KYC required before setWhitelist() · rights defined in Operating Agreement</div></div>
+      <button class="btn btn-primary btn-sm" onclick="showWhitelistForm()">+ Whitelist Investor</button>
+    </div>
+
+    <!-- Whitelist form (hidden by default) -->
+    <div id="whitelist-form" style="display:none;background:#fff;border:1px solid var(--ghost);border-radius:var(--r);padding:18px 20px;margin-bottom:20px">
+      <div style="font-size:13px;font-weight:700;margin-bottom:12px">Add / Update KYC Whitelist Entry</div>
+      <div style="display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:end">
+        <div>
+          <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:4px">WALLET ADDRESS</label>
+          <input id="wl-address" type="text" placeholder="0x..." style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:7px 10px;font-family:var(--mono);font-size:12px">
+        </div>
+        <div>
+          <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:4px">STATUS</label>
+          <select id="wl-status" style="border:1px solid var(--ghost);border-radius:var(--r);padding:7px 10px;font-family:var(--sans);font-size:12px;background:#fff">
+            <option value="true">Approve (true)</option>
+            <option value="false">Revoke (false)</option>
+          </select>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-primary btn-sm" onclick="callSetWhitelist()">setWhitelist()</button>
+          <button class="btn btn-outline btn-sm" onclick="hideWhitelistForm()">Cancel</button>
+        </div>
+      </div>
+      <div style="font-size:10px;color:var(--steel);margin-top:8px;font-family:var(--mono)">Calls STLLCEquityToken.setWhitelist() — requires COMPLIANCE_ROLE · Reg D 506(c) accredited investors only</div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Wallet</th><th>STLLC Balance</th><th>KYC Status</th><th>Accrued (Live)</th><th>Settled (Unsent)</th><th>Total Claimed</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr><td><code style="font-family:var(--mono);font-size:11px">0x1234...abcd</code></td><td>200 STLLC</td><td><span class="pill pill-active">VERIFIED</span></td><td>$0</td><td>$0</td><td>$0</td><td><button class="btn btn-outline btn-sm" onclick="showManageInvestor('0x1234...abcd')">Manage</button></td></tr>
+          <tr><td><code style="font-family:var(--mono);font-size:11px">0x5678...efgh</code></td><td>100 STLLC</td><td><span class="pill pill-pending">PENDING KYC</span></td><td>—</td><td>—</td><td>—</td><td><button class="btn btn-outline btn-sm" onclick="showReviewKYC('0x5678...efgh')">Review KYC</button></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- DISTRIBUTIONS -->
+  <div id="page-distributions" style="display:none">
+    <div class="page-head">
+      <div><div class="page-title">Profit Distributions</div><div class="page-sub">20% of quarterly net profit · USDC accumulator · pro-rata to all STLLC holders</div></div>
+      <button class="btn btn-primary btn-sm" onclick="showDistModal()">+ New Distribution</button>
+    </div>
+
+    <div class="stats" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px">
+      <div class="stat-card">
+        <div class="stat-label">Total Distributed</div>
+        <div class="stat-value stat-up" id="d-total">$0</div>
+        <div class="stat-sub">USDC all-time to investors</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Distribution Rounds</div>
+        <div class="stat-value" id="d-count">0</div>
+        <div class="stat-sub">from distributionHistory[]</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Acc. Per Token</div>
+        <div class="stat-value" id="d-acc">0</div>
+        <div class="stat-sub">accumulatedPerToken (scaled)</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><div class="section-title">Distribution History</div></div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Round</th><th>Deal Reference</th><th>Amount (USDC)</th><th>Acc/Token Snapshot</th><th>Date</th></tr>
+          </thead>
+          <tbody id="dist-history-body">
+            <tr><td colspan="5" style="text-align:center;color:var(--steel);padding:32px">No distributions yet — deploy contracts and call <code style="font-family:var(--mono);font-size:11px">depositDistribution()</code> to begin.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><div class="section-title">How the Accumulator Works</div></div>
+      <div class="dist-panel">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px">
+          <div>
+            <div style="font-size:10px;font-family:var(--mono);color:#666;margin-bottom:6px">STEP 1 — MANAGER DEPOSITS</div>
+            <div style="font-size:12px;color:#ccc;line-height:1.6">Manager calls <code style="font-family:var(--mono);color:var(--teal)">depositDistribution(amount, dealRef)</code> after each quarterly close. USDC is pulled into the contract.</div>
+          </div>
+          <div>
+            <div style="font-size:10px;font-family:var(--mono);color:#666;margin-bottom:6px">STEP 2 — ACCUMULATOR UPDATES</div>
+            <div style="font-size:12px;color:#ccc;line-height:1.6"><code style="font-family:var(--mono);color:var(--teal)">accumulatedPerToken += amount / circulatingInvestorTokens</code>. No loops — O(1) gas regardless of investor count.</div>
+          </div>
+          <div>
+            <div style="font-size:10px;font-family:var(--mono);color:#666;margin-bottom:6px">STEP 3 — INVESTOR CLAIMS</div>
+            <div style="font-size:12px;color:#ccc;line-height:1.6">Each investor calls <code style="font-family:var(--mono);color:var(--teal)">claimRewards()</code> to pull their share. Pending rewards are preserved through transfers via <code style="font-family:var(--mono);color:var(--teal)">pendingSettled</code>.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KHAKISOL -->
+  <div id="page-khakisol" style="display:none">
+    <div class="page-head">
+      <div><div class="page-title">KhakiSol Loyalty</div><div class="page-sub">ERC-1155 · Shopify webhook → n8n → mintBadge() · 5% ERC-2981 royalty on product NFTs</div></div>
+      <span class="standard-badge badge-erc1155" style="font-size:11px;padding:5px 12px">ERC-1155</span>
+    </div>
+
+    <!-- Badge supply stats -->
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px">
+      <div class="stat-card"><div class="stat-label">Scout (ID 1)</div><div class="stat-value">—</div><div class="stat-sub">≥ $49.99 purchase</div></div>
+      <div class="stat-card"><div class="stat-label">Operator (ID 2)</div><div class="stat-value">—</div><div class="stat-sub">≥ $200 cumulative</div></div>
+      <div class="stat-card"><div class="stat-label">Trooper (ID 3)</div><div class="stat-value">—</div><div class="stat-sub">≥ $500 cumulative</div></div>
+      <div class="stat-card"><div class="stat-label">Commander (ID 4)</div><div class="stat-value">—</div><div class="stat-sub">≥ $1,000 · 1 per wallet</div></div>
+      <div class="stat-card"><div class="stat-label">Founding (ID 5)</div><div class="stat-value">0 / 100</div><div class="stat-sub">commemorative · hard cap</div></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+
+      <!-- Badge mint panel -->
+      <div class="contract-card">
+        <div class="contract-header">
+          <div><div class="contract-name">Mint Badge / SHTX</div><div class="contract-type" style="color:var(--steel);margin-top:2px">Called by n8n on Shopify order.paid webhook</div></div>
+        </div>
+        <div class="contract-body">
+          <div style="margin-bottom:10px">
+            <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:4px">CUSTOMER WALLET</label>
+            <input id="ks-wallet" type="text" placeholder="0x..." style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:7px 10px;font-family:var(--mono);font-size:12px">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+            <div>
+              <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:4px">BADGE TYPE</label>
+              <select id="ks-badge-type" style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:7px 10px;font-family:var(--sans);font-size:12px;background:#fff">
+                <option value="1">1 — Scout ($49.99+)</option>
+                <option value="2">2 — Operator ($200+)</option>
+                <option value="3">3 — Trooper ($500+)</option>
+                <option value="4">4 — Commander ($1,000+)</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:4px">SHTX AMOUNT</label>
+              <input id="ks-shtx-amount" type="number" placeholder="e.g. 4995" style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:7px 10px;font-family:var(--sans);font-size:12px">
+            </div>
+          </div>
+        </div>
+        <div class="contract-actions">
+          <button class="btn btn-primary btn-sm" onclick="callMintBadge()">mintBadge()</button>
+          <button class="btn btn-outline btn-sm" onclick="callMintSHTX()">mintSHTX()</button>
+          <button class="btn btn-outline btn-sm" onclick="callMintFoundingMember()">mintFoundingMember()</button>
+        </div>
+      </div>
+
+      <!-- Batch airdrop panel -->
+      <div class="contract-card">
+        <div class="contract-header">
+          <div><div class="contract-name">Batch Airdrop</div><div class="contract-type" style="color:var(--steel);margin-top:2px">batchMintBadges() — gas-efficient multi-recipient</div></div>
+        </div>
+        <div class="contract-body">
+          <div style="margin-bottom:10px">
+            <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:4px">WALLET LIST (one per line)</label>
+            <textarea id="ks-batch-wallets" rows="4" placeholder="0xabc...&#10;0xdef...&#10;0x123..." style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:7px 10px;font-family:var(--mono);font-size:11px;resize:vertical"></textarea>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div>
+              <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:4px">BADGE TYPE</label>
+              <select id="ks-batch-badge" style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:7px 10px;font-family:var(--sans);font-size:12px;background:#fff">
+                <option value="1">Scout</option>
+                <option value="2">Operator</option>
+                <option value="3">Trooper</option>
+                <option value="4">Commander</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:4px">AMOUNT PER WALLET</label>
+              <input id="ks-batch-amount" type="number" value="1" style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:7px 10px;font-family:var(--sans);font-size:12px">
+            </div>
+          </div>
+        </div>
+        <div class="contract-actions">
+          <button class="btn btn-primary btn-sm" onclick="callBatchMintBadges()">batchMintBadges()</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Badge threshold table -->
+    <div class="section">
+      <div class="section-head"><div class="section-title">Badge Unlock Thresholds (from contract)</div></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Token ID</th><th>Badge Name</th><th>Threshold (USD)</th><th>Threshold (cents)</th><th>Max per Wallet</th></tr></thead>
+          <tbody>
+            <tr><td><code style="font-family:var(--mono);font-size:11px">ID 1</code></td><td>Scout</td><td>$49.99</td><td>4,999</td><td>Unlimited</td></tr>
+            <tr><td><code style="font-family:var(--mono);font-size:11px">ID 2</code></td><td>Operator</td><td>$200.00</td><td>19,999</td><td>Unlimited</td></tr>
+            <tr><td><code style="font-family:var(--mono);font-size:11px">ID 3</code></td><td>Trooper</td><td>$500.00</td><td>49,999</td><td>Unlimited</td></tr>
+            <tr><td><code style="font-family:var(--mono);font-size:11px">ID 4</code></td><td>Commander</td><td>$1,000.00</td><td>99,999</td><td><span class="pill pill-active">1 per wallet</span></td></tr>
+            <tr><td><code style="font-family:var(--mono);font-size:11px">ID 5</code></td><td>Founding Member</td><td>—</td><td>—</td><td><span class="pill pill-deployed">100 total</span></td></tr>
+            <tr><td><code style="font-family:var(--mono);font-size:11px">ID 6+</code></td><td>Product Edition NFT</td><td>Per drop</td><td>Per drop</td><td>Per drop maxSupply</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Product drop creator -->
+    <div class="section">
+      <div class="section-head"><div class="section-title">Create Product Drop (ID 6+)</div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+
+        <!-- createProductDrop -->
+        <div class="contract-card">
+          <div class="contract-header">
+            <div><div class="contract-name">New Drop</div><div class="contract-type" style="color:var(--steel);margin-top:2px">createProductDrop() — DEFAULT_ADMIN_ROLE</div></div>
+          </div>
+          <div class="contract-body" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div>
+              <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:4px">DROP NAME</label>
+              <input id="ks-drop-name" type="text" placeholder="Desert Khaki OG Edition" style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:7px 10px;font-family:var(--sans);font-size:12px">
+            </div>
+            <div>
+              <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:4px">SKU</label>
+              <input id="ks-drop-sku" type="text" placeholder="KS-OG-001" style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:7px 10px;font-family:var(--mono);font-size:12px">
+            </div>
+            <div>
+              <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:4px">MAX SUPPLY</label>
+              <input id="ks-drop-supply" type="number" placeholder="50" style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:7px 10px;font-family:var(--sans);font-size:12px">
+            </div>
+            <div>
+              <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:4px">PRICE (USD CENTS)</label>
+              <input id="ks-drop-price" type="number" placeholder="14999" style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:7px 10px;font-family:var(--sans);font-size:12px">
+            </div>
+            <div style="grid-column:span 2">
+              <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:4px">METADATA URI (IPFS)</label>
+              <input id="ks-drop-uri" type="text" placeholder="ipfs://Qm..." style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:7px 10px;font-family:var(--mono);font-size:12px">
+            </div>
+          </div>
+          <div class="contract-actions">
+            <button class="btn btn-primary btn-sm" onclick="callCreateProductDrop()">createProductDrop()</button>
+          </div>
+        </div>
+
+        <!-- mintProductNFT -->
+        <div class="contract-card">
+          <div class="contract-header">
+            <div><div class="contract-name">Mint Product NFT</div><div class="contract-type" style="color:var(--steel);margin-top:2px">mintProductNFT() — fulfills a Shopify order</div></div>
+          </div>
+          <div class="contract-body">
+            <div style="margin-bottom:10px">
+              <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:4px">BUYER WALLET</label>
+              <input id="ks-nft-buyer" type="text" placeholder="0x..." style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:7px 10px;font-family:var(--mono);font-size:12px">
+            </div>
+            <div style="margin-bottom:10px">
+              <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:4px">TOKEN ID (assigned at createProductDrop)</label>
+              <input id="ks-nft-tokenid" type="number" placeholder="6" style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:7px 10px;font-family:var(--sans);font-size:12px">
+            </div>
+            <div style="font-size:10px;color:var(--steel);font-family:var(--mono)">Token IDs start at 6 — IDs 1–5 are badge tiers.</div>
+          </div>
+          <div class="contract-actions">
+            <button class="btn btn-primary btn-sm" onclick="callMintProductNFT()">mintProductNFT()</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- KhakiSol admin controls -->
+    <div class="section">
+      <div class="section-head"><div class="section-title">Admin Controls</div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+
+        <!-- Pause / Royalty -->
+        <div class="contract-card">
+          <div class="contract-header">
+            <div><div class="contract-name">Contract Settings</div><div class="contract-type" style="color:var(--steel);margin-top:2px">pause · unpause · setRoyalty — DEFAULT_ADMIN_ROLE</div></div>
+          </div>
+          <div class="contract-body">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px">
+              <div>
+                <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:4px">ROYALTY RECIPIENT</label>
+                <input id="ks-royalty-recipient" type="text" placeholder="0x..." style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:7px 10px;font-family:var(--mono);font-size:12px">
+              </div>
+              <div>
+                <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:4px">BPS (500 = 5%)</label>
+                <input id="ks-royalty-bps" type="number" placeholder="500" min="0" max="1000" style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:7px 10px;font-family:var(--sans);font-size:12px">
+              </div>
+            </div>
+          </div>
+          <div class="contract-actions">
+            <button class="btn btn-outline btn-sm" onclick="callPauseKhakiSol()">pause()</button>
+            <button class="btn btn-outline btn-sm" onclick="callUnpauseKhakiSol()">unpause()</button>
+            <button class="btn btn-primary btn-sm" onclick="callSetRoyalty()">setRoyalty()</button>
+          </div>
+        </div>
+
+        <!-- Role management -->
+        <div class="contract-card">
+          <div class="contract-header">
+            <div><div class="contract-name">Role Management</div><div class="contract-type" style="color:var(--steel);margin-top:2px">grantRole · revokeRole — DEFAULT_ADMIN_ROLE required</div></div>
+          </div>
+          <div class="contract-body">
+            <div style="margin-bottom:10px">
+              <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:4px">WALLET ADDRESS</label>
+              <input id="ks-role-wallet" type="text" placeholder="0x... (n8n minter wallet)" style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:7px 10px;font-family:var(--mono);font-size:12px">
+            </div>
+            <div>
+              <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:4px">ROLE</label>
+              <select id="ks-role-select" style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:7px 10px;font-family:var(--sans);font-size:12px;background:#fff">
+                <option value="minter">MINTER_ROLE</option>
+                <option value="pauser">PAUSER_ROLE</option>
+              </select>
+            </div>
+          </div>
+          <div class="contract-actions">
+            <button class="btn btn-primary btn-sm" onclick="callGrantRoleKhakiSol()">grantRole()</button>
+            <button class="btn btn-danger btn-sm" onclick="callRevokeRoleKhakiSol()">revokeRole()</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- SHTX -->
+  <div id="page-shtx" style="display:none">
+    <div class="page-head">
+      <div><div class="page-title">SHTX Utility Token</div><div class="page-sub">Community utility — NOT a security · no investment return · 10M max supply</div></div>
+      <span class="standard-badge badge-erc20" style="font-size:11px;padding:5px 12px">ERC-20</span>
+    </div>
+
+    <div class="stats" style="margin-bottom:20px">
+      <div class="stat-card"><div class="stat-label">Total Minted</div><div class="stat-value" id="s-shtx2">—</div><div class="stat-sub">of 10,000,000 max</div></div>
+      <div class="stat-card"><div class="stat-label">Remaining Supply</div><div class="stat-value">—</div><div class="stat-sub">mintable by MINTER_ROLE</div></div>
+      <div class="stat-card"><div class="stat-label">Reward Rate</div><div class="stat-value">10 SHTX</div><div class="stat-sub">per $1 KhakiSol purchase</div></div>
+      <div class="stat-card"><div class="stat-label">Daily Mint Limit</div><div class="stat-value">10,000</div><div class="stat-sub">SHTX per minter per day</div></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+
+      <!-- Mint form -->
+      <div class="contract-card">
+        <div class="contract-header">
+          <div><div class="contract-name">Mint SHTX</div><div class="contract-type" style="color:var(--steel);margin-top:2px">mint(address, amount, reason) — requires MINTER_ROLE</div></div>
+        </div>
+        <div class="contract-body">
+          <div style="margin-bottom:10px">
+            <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:4px">RECIPIENT WALLET</label>
+            <input id="shtx-recipient" type="text" placeholder="0x..." style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:7px 10px;font-family:var(--mono);font-size:12px">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+            <div>
+              <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:4px">AMOUNT (SHTX)</label>
+              <input id="shtx-amount" type="number" placeholder="e.g. 500" style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:7px 10px;font-family:var(--sans);font-size:12px">
+            </div>
+            <div>
+              <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:4px">REASON (on-chain)</label>
+              <input id="shtx-reason" type="text" placeholder="KhakiSol purchase reward" style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:7px 10px;font-family:var(--sans);font-size:12px">
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr;gap:8px">
+            <div>
+              <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:4px">PURCHASE AMOUNT (USD CENTS)</label>
+              <input id="shtx-purchase-cents" type="number" placeholder="e.g. 4995 for $49.95" style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:7px 10px;font-family:var(--sans);font-size:12px">
+            </div>
+            <div id="purchase-reward-result" style="background:var(--paper);border-radius:var(--r);padding:10px;font-size:12px;color:var(--steel);font-family:var(--mono)">
+              Enter a purchase amount and click calculatePurchaseReward() to see the live reward output.
+            </div>
+          </div>
+          <div style="font-size:10px;color:var(--steel);font-family:var(--mono)">calculatePurchaseReward(usdCents) = usdCents × 10 × 1e18 / 100</div>
+        </div>
+        <div class="contract-actions">
+          <button class="btn btn-primary btn-sm" onclick="callMintSHTXToken()">mint()</button>
+          <button class="btn btn-outline btn-sm" onclick="calcPurchaseReward()">calculatePurchaseReward()</button>
+        </div>
+      </div>
+
+      <!-- Tier lookup -->
+      <div class="contract-card">
+        <div class="contract-header">
+          <div><div class="contract-name">Tier Lookup</div><div class="contract-type" style="color:var(--steel);margin-top:2px">getTier(address) — view function</div></div>
+        </div>
+        <div class="contract-body">
+          <div style="margin-bottom:12px">
+            <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:4px">HOLDER WALLET</label>
+            <input id="shtx-tier-wallet" type="text" placeholder="0x..." style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:7px 10px;font-family:var(--mono);font-size:12px">
+          </div>
+          <div id="tier-result" style="background:var(--paper);border-radius:var(--r);padding:10px;font-size:12px;color:var(--steel);font-family:var(--mono)">
+            Enter a wallet address and click getTier() to see their tier.
+          </div>
+        </div>
+        <div class="contract-actions">
+          <button class="btn btn-primary btn-sm" onclick="callGetTier()">getTier()</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SHTX admin controls -->
+    <div class="section">
+      <div class="section-head"><div class="section-title">Admin Controls</div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px">
+
+        <!-- Pause / reward rate -->
+        <div class="contract-card">
+          <div class="contract-header">
+            <div><div class="contract-name">Contract Settings</div><div class="contract-type" style="color:var(--steel);margin-top:2px">pause · unpause · setRewardRate</div></div>
+          </div>
+          <div class="contract-body">
+            <div>
+              <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:4px">REWARD RATE (SHTX per 100 USD cents)</label>
+              <input id="shtx-reward-rate" type="number" placeholder="1000 (= 10 SHTX / $1)" style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:7px 10px;font-family:var(--sans);font-size:12px">
+            </div>
+          </div>
+          <div class="contract-actions">
+            <button class="btn btn-outline btn-sm" onclick="callPauseSHTX()">pause()</button>
+            <button class="btn btn-outline btn-sm" onclick="callUnpauseSHTX()">unpause()</button>
+            <button class="btn btn-primary btn-sm" onclick="callSetRewardRate()">setRewardRate()</button>
+          </div>
+        </div>
+
+        <!-- Role management -->
+        <div class="contract-card">
+          <div class="contract-header">
+            <div><div class="contract-name">Role Management</div><div class="contract-type" style="color:var(--steel);margin-top:2px">grantRole · revokeRole — DEFAULT_ADMIN_ROLE</div></div>
+          </div>
+          <div class="contract-body">
+            <div style="margin-bottom:10px">
+              <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:4px">WALLET ADDRESS</label>
+              <input id="shtx-role-wallet" type="text" placeholder="0x... (n8n minter wallet)" style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:7px 10px;font-family:var(--mono);font-size:12px">
+            </div>
+            <div>
+              <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:4px">ROLE</label>
+              <select id="shtx-role-select" style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:7px 10px;font-family:var(--sans);font-size:12px;background:#fff">
+                <option value="minter">MINTER_ROLE</option>
+                <option value="pauser">PAUSER_ROLE</option>
+              </select>
+            </div>
+          </div>
+          <div class="contract-actions">
+            <button class="btn btn-primary btn-sm" onclick="callGrantRoleSHTX()">grantRole()</button>
+            <button class="btn btn-danger btn-sm" onclick="callRevokeRoleSHTX()">revokeRole()</button>
+          </div>
+        </div>
+
+        <!-- Burn -->
+        <div class="contract-card">
+          <div class="contract-header">
+            <div><div class="contract-name">Burn Tokens</div><div class="contract-type" style="color:var(--steel);margin-top:2px">burn · burnFrom — token holder or approved</div></div>
+          </div>
+          <div class="contract-body">
+            <div style="margin-bottom:10px">
+              <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:4px">AMOUNT (SHTX)</label>
+              <input id="shtx-burn-amount" type="number" placeholder="e.g. 100" style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:7px 10px;font-family:var(--sans);font-size:12px">
+            </div>
+            <div>
+              <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:4px">FROM WALLET (burnFrom only)</label>
+              <input id="shtx-burnfrom-wallet" type="text" placeholder="0x... (leave blank for burn())" style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:7px 10px;font-family:var(--mono);font-size:12px">
+            </div>
+          </div>
+          <div class="contract-actions">
+            <button class="btn btn-danger btn-sm" onclick="callBurnSHTX()">burn()</button>
+            <button class="btn btn-outline btn-sm" onclick="callBurnFromSHTX()">burnFrom()</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Tier breakdown table -->
+    <div class="section">
+      <div class="section-head"><div class="section-title">Utility Tiers (from contract constructor)</div></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Tier</th><th>Min Balance</th><th>Benefit</th><th>SHTX to Reach</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>None</strong></td>
+              <td>0 SHTX</td>
+              <td style="color:var(--steel)">Hold SHTX to unlock platform benefits</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--steel)">Scout</strong></td>
+              <td><code style="font-family:var(--mono);font-size:11px">100 SHTX</code></td>
+              <td>Deal newsletter access</td>
+              <td>≈ $10 of KhakiSol purchases</td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--teal)">Operator</strong></td>
+              <td><code style="font-family:var(--mono);font-size:11px">500 SHTX</code></td>
+              <td>Early deal notifications + Discord</td>
+              <td>≈ $50 of KhakiSol purchases</td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--blue)">Trooper</strong></td>
+              <td><code style="font-family:var(--mono);font-size:11px">2,000 SHTX</code></td>
+              <td>Whitelist priority on deal notes</td>
+              <td>≈ $200 of KhakiSol purchases</td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--amber)">Commander</strong></td>
+              <td><code style="font-family:var(--mono);font-size:11px">5,000 SHTX</code></td>
+              <td>Direct access + KhakiSol 20% discount</td>
+              <td>≈ $500 of KhakiSol purchases</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN CONSOLE -->
+  <div id="page-admin" style="display:none">
+    <div class="page-head">
+      <div>
+        <div class="page-title">Admin Console</div>
+        <div class="page-sub">All write operations across every deployed contract — requires DEFAULT_ADMIN_ROLE or specific role</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-outline btn-sm" onclick="refreshData()">Refresh</button>
+      </div>
+    </div>
+
+    <!-- ── STLLCEquityToken ── -->
+    <div class="section">
+      <div class="section-head" style="display:flex;align-items:center;gap:10px">
+        <div class="section-title">STLLCEquityToken</div>
+        <span class="standard-badge badge-erc20" style="font-size:10px;padding:3px 8px">UUPS · ERC-20</span>
+        <code style="font-family:var(--mono);font-size:10px;color:var(--steel)" id="admin-addr-equity">Not deployed</code>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px">
+
+        <!-- Contract controls -->
+        <div class="contract-card">
+          <div class="contract-header">
+            <div><div class="contract-name">Contract Controls</div><div class="contract-type" style="color:var(--steel);margin-top:2px">pause · unpause · emergencyWithdraw · upgradeTo</div></div>
+          </div>
+          <div class="contract-body">
+            <div style="margin-bottom:10px">
+              <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:4px">EMERGENCY WITHDRAW — TO (address)</label>
+              <input id="eq-ew-to" type="text" placeholder="0x..." style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:7px 10px;font-family:var(--mono);font-size:12px">
+            </div>
+            <div style="margin-bottom:10px">
+              <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:4px">AMOUNT (USDC 6 dec)</label>
+              <input id="eq-ew-amount" type="number" placeholder="e.g. 1000000000" style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:7px 10px;font-family:var(--sans);font-size:12px">
+            </div>
+            <div>
+              <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:4px">UPGRADE — NEW IMPL ADDRESS</label>
+              <input id="eq-upgrade-impl" type="text" placeholder="0x... new logic contract" style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:7px 10px;font-family:var(--mono);font-size:12px">
+            </div>
+          </div>
+          <div class="contract-actions">
+            <button class="btn btn-outline btn-sm" onclick="callPauseEquity()">pause()</button>
+            <button class="btn btn-outline btn-sm" onclick="callUnpauseEquity()">unpause()</button>
+            <button class="btn btn-danger btn-sm" onclick="callEmergencyWithdraw()">emergencyWithdraw()</button>
+            <button class="btn btn-outline btn-sm" onclick="callUpgradeTo()">upgradeTo()</button>
+          </div>
+        </div>
+
+        <!-- Token issuance -->
+        <div class="contract-card">
+          <div class="contract-header">
+            <div><div class="contract-name">Token Issuance</div><div class="contract-type" style="color:var(--steel);margin-top:2px">distributeInvestorTokens — MANAGER_ROLE</div></div>
+          </div>
+          <div class="contract-body">
+            <div style="margin-bottom:10px">
+              <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:4px">INVESTOR WALLET</label>
+              <input id="eq-dist-investor" type="text" placeholder="0x..." style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:7px 10px;font-family:var(--mono);font-size:12px">
+            </div>
+            <div style="margin-bottom:10px">
+              <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:4px">TOKEN AMOUNT (whole tokens)</label>
+              <input id="eq-dist-amount" type="number" placeholder="e.g. 200" style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:7px 10px;font-family:var(--sans);font-size:12px">
+            </div>
+            <div style="font-size:10px;color:var(--steel);font-family:var(--mono)">1 STLLC = 1 equity share · max 2,000 STLLC investor tokens</div>
+          </div>
+          <div class="contract-actions">
+            <button class="btn btn-primary btn-sm" onclick="callDistributeTokens()">distributeInvestorTokens()</button>
+          </div>
+        </div>
+
+        <!-- Role management -->
+        <div class="contract-card">
+          <div class="contract-header">
+            <div><div class="contract-name">Role Management</div><div class="contract-type" style="color:var(--steel);margin-top:2px">grantRole · revokeRole — DEFAULT_ADMIN_ROLE</div></div>
+          </div>
+          <div class="contract-body">
+            <div style="margin-bottom:10px">
+              <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:4px">WALLET ADDRESS</label>
+              <input id="eq-role-wallet" type="text" placeholder="0x..." style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:7px 10px;font-family:var(--mono);font-size:12px">
+            </div>
+            <div>
+              <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:4px">ROLE</label>
+              <select id="eq-role-select" style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:7px 10px;font-family:var(--sans);font-size:12px;background:#fff">
+                <option value="compliance">COMPLIANCE_ROLE</option>
+                <option value="manager">MANAGER_ROLE</option>
+                <option value="pauser">PAUSER_ROLE</option>
+                <option value="upgrader">UPGRADER_ROLE</option>
+              </select>
+            </div>
+          </div>
+          <div class="contract-actions">
+            <button class="btn btn-primary btn-sm" onclick="callGrantRoleEquity()">grantRole()</button>
+            <button class="btn btn-danger btn-sm" onclick="callRevokeRoleEquity()">revokeRole()</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Batch whitelist + Governance -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+
+        <!-- Batch whitelist -->
+        <div class="contract-card">
+          <div class="contract-header">
+            <div><div class="contract-name">Batch Whitelist</div><div class="contract-type" style="color:var(--steel);margin-top:2px">batchSetWhitelist — COMPLIANCE_ROLE</div></div>
+          </div>
+          <div class="contract-body">
+            <div style="margin-bottom:10px">
+              <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:4px">WALLET LIST (one per line)</label>
+              <textarea id="eq-batch-wallets" rows="4" placeholder="0xabc...&#10;0xdef...&#10;0x123..." style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:7px 10px;font-family:var(--mono);font-size:11px;resize:vertical"></textarea>
+            </div>
+            <div>
+              <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:4px">STATUS</label>
+              <select id="eq-batch-status" style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:7px 10px;font-family:var(--sans);font-size:12px;background:#fff">
+                <option value="true">true — approve (whitelist)</option>
+                <option value="false">false — revoke</option>
+              </select>
+            </div>
+          </div>
+          <div class="contract-actions">
+            <button class="btn btn-primary btn-sm" onclick="callBatchSetWhitelist()">batchSetWhitelist()</button>
+          </div>
+        </div>
+
+        <!-- Governance -->
+        <div class="contract-card">
+          <div class="contract-header">
+            <div><div class="contract-name">Governance</div><div class="contract-type" style="color:var(--steel);margin-top:2px">createProposal · castVote — token holders</div></div>
+          </div>
+          <div class="contract-body">
+            <div style="margin-bottom:10px">
+              <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:4px">PROPOSAL DESCRIPTION</label>
+              <input id="eq-prop-desc" type="text" placeholder="Authorize distribution Q2-2026" style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:7px 10px;font-family:var(--sans);font-size:12px">
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+              <div>
+                <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:4px">VOTING PERIOD (seconds)</label>
+                <input id="eq-prop-period" type="number" placeholder="604800 (7 days)" style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:7px 10px;font-family:var(--sans);font-size:12px">
+              </div>
+              <div>
+                <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:4px">PROPOSAL ID (for vote)</label>
+                <input id="eq-vote-id" type="number" placeholder="0" style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:7px 10px;font-family:var(--sans);font-size:12px">
+              </div>
+            </div>
+          </div>
+          <div class="contract-actions">
+            <button class="btn btn-primary btn-sm" onclick="callCreateProposal()">createProposal()</button>
+            <button class="btn btn-outline btn-sm" onclick="callCastVoteFor()">castVote(FOR)</button>
+            <button class="btn btn-outline btn-sm" onclick="callCastVoteAgainst()">castVote(AGAINST)</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── STDealNote ── -->
+    <div class="section">
+      <div class="section-head" style="display:flex;align-items:center;gap:10px">
+        <div class="section-title">STDealNote (ST-DEAL-008)</div>
+        <span class="standard-badge" style="font-size:10px;padding:3px 8px;background:var(--amber);color:#fff">ERC-20 · Fixed Yield</span>
+        <code style="font-family:var(--mono);font-size:10px;color:var(--steel)" id="admin-addr-note">Not deployed</code>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px">
+
+        <!-- Controls -->
+        <div class="contract-card">
+          <div class="contract-header">
+            <div><div class="contract-name">Contract Controls</div><div class="contract-type" style="color:var(--steel);margin-top:2px">pause · unpause — PAUSER_ROLE</div></div>
+          </div>
+          <div class="contract-body">
+            <div style="font-size:11px;color:var(--steel);line-height:1.6">
+              Pausing halts all token transfers and redemptions. Use during incident response. Unpausing resumes normal operation.<br><br>
+              <span style="color:var(--amber)">Note: depositRepayment() is on the Deal Pipeline page.</span>
+            </div>
+          </div>
+          <div class="contract-actions">
+            <button class="btn btn-outline btn-sm" onclick="callPauseDealNote()">pause()</button>
+            <button class="btn btn-outline btn-sm" onclick="callUnpauseDealNote()">unpause()</button>
+          </div>
+        </div>
+
+        <!-- Issue tokens -->
+        <div class="contract-card">
+          <div class="contract-header">
+            <div><div class="contract-name">Issue Deal Tokens</div><div class="contract-type" style="color:var(--steel);margin-top:2px">issueTokens — MANAGER_ROLE</div></div>
+          </div>
+          <div class="contract-body">
+            <div style="margin-bottom:10px">
+              <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:4px">INVESTOR WALLET</label>
+              <input id="dn-issue-investor" type="text" placeholder="0x..." style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:7px 10px;font-family:var(--mono);font-size:12px">
+            </div>
+            <div style="margin-bottom:10px">
+              <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:4px">TOKEN AMOUNT</label>
+              <input id="dn-issue-amount" type="number" placeholder="e.g. 10 tokens × $100 face" style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:7px 10px;font-family:var(--sans);font-size:12px">
+            </div>
+            <div style="font-size:10px;color:var(--steel);font-family:var(--mono)">Max 1,290 tokens · $100 face · $106 repayment at maturity</div>
+          </div>
+          <div class="contract-actions">
+            <button class="btn btn-primary btn-sm" onclick="callIssueTokens()">issueTokens()</button>
+          </div>
+        </div>
+
+        <!-- Role + redeem -->
+        <div class="contract-card">
+          <div class="contract-header">
+            <div><div class="contract-name">Roles &amp; Redemption</div><div class="contract-type" style="color:var(--steel);margin-top:2px">grantRole · revokeRole · redeem</div></div>
+          </div>
+          <div class="contract-body">
+            <div style="margin-bottom:10px">
+              <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:4px">WALLET (for grant/revoke)</label>
+              <input id="dn-role-wallet" type="text" placeholder="0x..." style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:7px 10px;font-family:var(--mono);font-size:12px">
+            </div>
+            <div style="margin-bottom:10px">
+              <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:4px">ROLE</label>
+              <select id="dn-role-select" style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:7px 10px;font-family:var(--sans);font-size:12px;background:#fff">
+                <option value="compliance">COMPLIANCE_ROLE</option>
+                <option value="manager">MANAGER_ROLE</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:4px">REDEEM TOKENS (investor)</label>
+              <input id="dn-redeem-amount" type="number" placeholder="token amount to redeem" style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:7px 10px;font-family:var(--sans);font-size:12px">
+            </div>
+          </div>
+          <div class="contract-actions">
+            <button class="btn btn-primary btn-sm" onclick="callGrantRoleDealNote()">grantRole()</button>
+            <button class="btn btn-danger btn-sm" onclick="callRevokeRoleDealNote()">revokeRole()</button>
+            <button class="btn btn-outline btn-sm" onclick="callRedeemNote()">redeem()</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── STDealTrackRecord ── -->
+    <div class="section">
+      <div class="section-head" style="display:flex;align-items:center;gap:10px">
+        <div class="section-title">STDealTrackRecord</div>
+        <span class="standard-badge" style="font-size:10px;padding:3px 8px;background:var(--blue);color:#fff">ERC-721 · Soulbound</span>
+        <code style="font-family:var(--mono);font-size:10px;color:var(--steel)" id="admin-addr-track">Not deployed</code>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+
+        <!-- verifyDeal + roles -->
+        <div class="contract-card">
+          <div class="contract-header">
+            <div><div class="contract-name">Verify Deal &amp; Roles</div><div class="contract-type" style="color:var(--steel);margin-top:2px">verifyDeal · grantRole · revokeRole</div></div>
+          </div>
+          <div class="contract-body">
+            <div style="margin-bottom:10px">
+              <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:4px">TOKEN ID (to verify)</label>
+              <input id="tr-verify-id" type="number" placeholder="0" style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:7px 10px;font-family:var(--sans);font-size:12px">
+            </div>
+            <div style="margin-bottom:10px">
+              <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:4px">WALLET (for grant/revoke)</label>
+              <input id="tr-role-wallet" type="text" placeholder="0x... (title company, minter)" style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:7px 10px;font-family:var(--mono);font-size:12px">
+            </div>
+            <div>
+              <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:4px">ROLE</label>
+              <select id="tr-role-select" style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:7px 10px;font-family:var(--sans);font-size:12px;background:#fff">
+                <option value="minter">MINTER_ROLE</option>
+                <option value="verifier">VERIFIER_ROLE</option>
+              </select>
+            </div>
+          </div>
+          <div class="contract-actions">
+            <button class="btn btn-primary btn-sm" onclick="callVerifyDeal()">verifyDeal()</button>
+            <button class="btn btn-outline btn-sm" onclick="callGrantRoleTrackRecord()">grantRole()</button>
+            <button class="btn btn-danger btn-sm" onclick="callRevokeRoleTrackRecord()">revokeRole()</button>
+          </div>
+        </div>
+
+        <!-- Mint deal record -->
+        <div class="contract-card">
+          <div class="contract-header">
+            <div><div class="contract-name">Mint Deal Record</div><div class="contract-type" style="color:var(--steel);margin-top:2px">mintDealRecord() — soulbound NFT on deal close</div></div>
+          </div>
+          <div class="contract-body" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div>
+              <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:3px">RECIPIENT</label>
+              <input id="tr-recipient" type="text" placeholder="0x..." style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:6px 8px;font-family:var(--mono);font-size:11px">
+            </div>
+            <div>
+              <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:3px">DEAL ID</label>
+              <input id="tr-dealid" type="text" placeholder="ST-DEAL-008" style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:6px 8px;font-family:var(--mono);font-size:11px">
+            </div>
+            <div style="grid-column:span 2">
+              <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:3px">TOKEN URI (IPFS metadata)</label>
+              <input id="tr-tokenuri" type="text" placeholder="ipfs://Qm..." style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:6px 8px;font-family:var(--mono);font-size:11px">
+            </div>
+            <div style="grid-column:span 2">
+              <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:3px">PROPERTY ADDRESS</label>
+              <input id="tr-propaddr" type="text" placeholder="142 Ridgewood Dr, De Soto, MO 63020" style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:6px 8px;font-family:var(--sans);font-size:11px">
+            </div>
+            <div>
+              <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:3px">COUNTY</label>
+              <input id="tr-county" type="text" placeholder="Jefferson" style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:6px 8px;font-family:var(--sans);font-size:11px">
+            </div>
+            <div>
+              <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:3px">DEAL TYPE</label>
+              <select id="tr-dealtype" style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:6px 8px;font-family:var(--sans);font-size:11px;background:#fff">
+                <option>Fix &amp; Flip</option>
+                <option>Wholesale</option>
+                <option>Buy &amp; Hold</option>
+                <option>Creative Finance</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:3px">PURCHASE PRICE ($)</label>
+              <input id="tr-purchase" type="number" placeholder="85000" style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:6px 8px;font-family:var(--sans);font-size:11px">
+            </div>
+            <div>
+              <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:3px">ARV ($)</label>
+              <input id="tr-arv" type="number" placeholder="195000" style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:6px 8px;font-family:var(--sans);font-size:11px">
+            </div>
+            <div>
+              <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:3px">NET PROFIT ($)</label>
+              <input id="tr-profit" type="number" placeholder="36740" style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:6px 8px;font-family:var(--sans);font-size:11px">
+            </div>
+            <div>
+              <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:3px">DAYS TO CLOSE</label>
+              <input id="tr-daysclose" type="number" placeholder="90" style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:6px 8px;font-family:var(--sans);font-size:11px">
+            </div>
+            <div>
+              <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:3px">INVESTOR RETURN BPS</label>
+              <input id="tr-returnbps" type="number" placeholder="600 (= 6%)" style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:6px 8px;font-family:var(--sans);font-size:11px">
+            </div>
+            <div>
+              <label style="font-size:10px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:3px">IPFS DOC HASH</label>
+              <input id="tr-ipfshash" type="text" placeholder="Qm..." style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:6px 8px;font-family:var(--mono);font-size:11px">
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
+              <input id="tr-titleverified" type="checkbox" style="width:16px;height:16px">
+              <label style="font-size:11px;color:var(--steel);font-family:var(--sans)">Verified by title company</label>
+            </div>
+          </div>
+          <div class="contract-actions">
+            <button class="btn btn-primary btn-sm" onclick="callMintDealRecord()">mintDealRecord()</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+  <!-- /ADMIN CONSOLE -->
+
+</main>
+</div>
+
+<!-- Toast notification -->
+<div id="toast" style="display:none;position:fixed;bottom:24px;right:24px;color:#fff;padding:12px 18px;border-radius:6px;font-size:12px;font-family:var(--mono);z-index:300;max-width:400px;transition:opacity 0.3s;line-height:1.5"></div>
+
+<!-- Generic contract call preview modal -->
+<div id="call-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:200;align-items:center;justify-content:center">
+  <div style="background:#111;border-radius:8px;padding:28px;width:480px;max-width:90vw;font-family:var(--mono)">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px">
+      <div>
+        <div style="font-size:16px;font-weight:700;color:#fff" id="cm-fn">function()</div>
+        <div style="font-size:11px;color:#555;margin-top:3px">Contract: <span id="cm-contract" style="color:var(--teal)"></span></div>
+      </div>
+      <button class="btn btn-outline btn-sm" onclick="closeCallModal()" style="color:#888;font-size:16px;line-height:1;padding:4px 8px">✕</button>
+    </div>
+    <div style="background:#0a0a0a;border-radius:6px;padding:12px;margin-bottom:12px">
+      <div style="font-size:10px;color:#444;letter-spacing:0.08em;margin-bottom:6px">CONTRACT ADDRESS</div>
+      <div id="cm-addr" style="font-size:11px;color:#888;word-break:break-all">Not deployed</div>
+    </div>
+    <div style="background:#0a0a0a;border-radius:6px;padding:12px;margin-bottom:20px;min-height:60px">
+      <div style="font-size:10px;color:#444;letter-spacing:0.08em;margin-bottom:8px">PARAMETERS</div>
+      <div id="cm-args"></div>
+    </div>
+    <div id="cm-hint" style="font-size:10px;color:#444;margin-bottom:14px;line-height:1.6">Deploy contracts first, then execute via MetaMask or paste into Sequence Builder write interface.</div>
+    <div id="cm-tx-result" style="display:none;background:#0d1a17;border-radius:6px;padding:10px 12px;margin-bottom:14px;font-size:11px">
+      <div style="color:#555;font-size:10px;letter-spacing:0.06em;margin-bottom:4px">TRANSACTION SUBMITTED</div>
+      <div id="cm-tx-hash" style="color:var(--teal);word-break:break-all;cursor:pointer" onclick="openTxOnExplorer()"></div>
+      <div style="color:#555;font-size:10px;margin-top:4px">Click hash to view on Polygonscan ↗</div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-outline btn-sm" onclick="copyCallData()" style="font-family:var(--mono)">Copy</button>
+      <button class="btn btn-outline btn-sm" onclick="importToSequence()" style="font-family:var(--mono)">Sequence ↗</button>
+      <button id="cm-exec-btn" class="btn btn-primary btn-sm" onclick="execViaMetaMask()" style="font-family:var(--mono)">Execute via MetaMask →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Distribution Modal -->
+<div id="dist-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:100;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:8px;padding:28px;width:420px;max-width:90vw">
+    <div style="font-size:16px;font-weight:700;margin-bottom:16px">Deposit Quarterly Distribution</div>
+    <div style="font-size:12px;color:var(--steel);margin-bottom:16px">20% of net quarterly profit → auto-distributed to all STLLC holders in USDC</div>
+    <label style="font-size:11px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:4px">USDC AMOUNT</label>
+    <input id="dist-amount" type="number" placeholder="e.g. 15000" style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:8px 10px;font-family:var(--sans);font-size:13px;margin-bottom:12px">
+    <label style="font-size:11px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:4px">DEAL REFERENCE</label>
+    <input id="dist-ref" type="text" placeholder="Q1-2026 — 3 Jefferson Co. deals" style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:8px 10px;font-family:var(--sans);font-size:13px;margin-bottom:16px">
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-outline" onclick="closeDistModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="callDepositDistribution()">Deposit Distribution</button>
+    </div>
+  </div>
+</div>
+
+<!-- Deal Note Repayment Modal -->
+<div id="repay-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:100;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:8px;padding:28px;width:460px;max-width:90vw">
+    <div style="font-size:16px;font-weight:700;margin-bottom:6px">Deposit Note Repayment — ST-DEAL-008</div>
+    <div style="font-size:12px;color:var(--steel);margin-bottom:16px">Calls <code style="font-family:var(--mono)">depositRepayment(amount)</code> on STDealNote — triggers maturity and enables investor redemptions.</div>
+    <div style="background:var(--paper);border-radius:var(--r);padding:12px;margin-bottom:16px;font-family:var(--mono);font-size:11px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div><span style="color:var(--steel)">PRINCIPAL:</span> $129,000</div>
+        <div><span style="color:var(--steel)">TOKENS:</span> 1,290</div>
+        <div><span style="color:var(--steel)">REPAY/TOKEN:</span> $106 USDC</div>
+        <div><span style="color:var(--steel)">TOTAL REQUIRED:</span> <span style="color:var(--teal);font-weight:700">$136,740</span></div>
+      </div>
+    </div>
+    <label style="font-size:11px;color:var(--steel);font-family:var(--mono);display:block;margin-bottom:4px">USDC AMOUNT (must cover all circulating tokens × $106)</label>
+    <input id="repay-amount" type="number" placeholder="136740000000 (6 decimals)" style="width:100%;border:1px solid var(--ghost);border-radius:var(--r);padding:8px 10px;font-family:var(--mono);font-size:12px;margin-bottom:16px">
+    <div style="font-size:10px;color:var(--amber);font-family:var(--mono);margin-bottom:16px">⚠ Approve USDC on the token contract before calling. Sets matured = true — irreversible.</div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-outline" onclick="closeRepayModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="callDepositRepayment()">depositRepayment()</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Constants ────────────────────────────────────────────────────────────
+const pages = ['dashboard','contracts','deals','investors','distributions','khakisol','shtx','legalstack','sequence','deploy','admin'];
+const ADDR_IDS = {
+  STLLCEquityToken:  'addr-equity',
+  STDealNote:        'addr-note',
+  SHTXUtilityToken:  'addr-shtx',
+  STDealTrackRecord: 'addr-track',
+  KhakiSolLoyalty:   'addr-loyalty',
+};
+const BADGE_NAMES = { 1:'Scout', 2:'Operator', 3:'Trooper', 4:'Commander', 5:'Founding Member' };
+
+// ── Web3Auth ───────────────────────────────────────────────────────────────
+const WEB3AUTH_CLIENT_ID = 'BPNks69eCF-kyHUONTJoN3uft7i-ST6J2Rl8HlPjCu3YQSraSk_1wgkgSvmYOfK46kSYirPbZYrm6pFxs3lBFh4';
+let _web3auth = null;
+let _activeProvider = null; // Web3Auth provider or window.ethereum
+
+// ── State ─────────────────────────────────────────────────────────────────
+let ABIS = {};
+let _pendingCall = null;
+let _manifestChainId = 80002;
+
+const ROLE_HASHES = {
+  minter:     '0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6',
+  pauser:     '0x65d7a28e3265b37a6474929f336521b332c1681b933f6cb9f3376673440d862a',
+  compliance: '0x442a94f1a1fac79af32856af2a64f63648cfa2ef3b98610a5bb7cbec4cee6985',
+  manager:    '0x241ecf16d79d0f8dbfb92cbc07fe17840425976cf0667f022fe9877caa831b08',
+  upgrader:   '0x189ab7a9244df0848122154315af71fe140f3db0fe014031783b0946b8c9d2e3',
+  verifier:   '0x0ce23c3e399818cfee81a7ab0880f714e53d7672b08df0fa62f2843416e1ea09',
+};
+
+// ── Helpers ───────────────────────────────────────────────────────────────
+function toWei(n) {
+  return (BigInt(Math.round(Number(n))) * BigInt('1000000000000000000')).toString();
+}
+function getFullAddr(id) {
+  const el = document.getElementById(id);
+  return el ? (el.getAttribute('data-full') || el.textContent) : null;
+}
+function getReadChainId() {
+  if (_manifestChainId === 137 || _manifestChainId === 80002) return _manifestChainId;
+  return _lastChainId === 137 ? 137 : 80002;
+}
+function getReadRpcUrl() {
+  return getReadChainId() === 137
+    ? 'https://polygon-rpc.com'
+    : 'https://rpc-amoy.polygon.technology';
+}
+function getReadProvider() {
+  return new ethers.providers.JsonRpcProvider(getReadRpcUrl(), getReadChainId());
+}
+async function getReadContract(contractName) {
+  if (!ABIS[contractName]) await loadABIs();
+  const abi = ABIS[contractName];
+  if (!abi) throw new Error('ABI not loaded for ' + contractName);
+
+  const addr = getFullAddr(ADDR_IDS[contractName]);
+  if (!addr || addr.includes('Not deployed')) throw new Error(contractName + ' is not deployed');
+
+  return new ethers.Contract(addr, abi, getReadProvider());
+}
+function buildDealRefAliases(ref) {
+  const raw = String(ref || '').trim().toUpperCase();
+  const digits = raw.match(/(\d+)/);
+  if (!digits) return [raw];
+
+  const n = digits[1].padStart(3, '0');
+  return [...new Set([
+    raw,
+    'ST-' + n,
+    'ST-DEAL-' + n,
+  ])];
+}
+async function resolveTrackRecordTokenId(ref) {
+  if (ref === undefined || ref === null || ref === '') return null;
+  if (/^\d+$/.test(String(ref).trim())) return String(ref).trim();
+
+  const aliases = buildDealRefAliases(ref);
+  const track = await getReadContract('STDealTrackRecord');
+  const total = Number((await track.totalTokensMinted()).toString());
+
+  for (let i = total - 1; i >= 0; i--) {
+    const record = await track.dealRecords(i);
+    const dealId = String(record.dealId || record[0] || '').trim().toUpperCase();
+    if (aliases.includes(dealId)) return String(i);
+  }
+
+  return null;
+}
+
+// ── Toast ───────────────────────────────────────────────────────────────
+function toast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = type === 'error' ? 'var(--red)' : type === 'success' ? 'var(--teal)' : '#222';
+  t.style.display = 'block';
+  t.style.opacity = '1';
+  clearTimeout(t._tid);
+  t._tid = setTimeout(() => {
+    t.style.opacity = '0';
+    setTimeout(() => { t.style.display = 'none'; }, 300);
+  }, 3200);
+}
+
+// ── Call preview modal ───────────────────────────────────────────────────
+function showCallModal(fn, contract, displayArgs, txArgs) {
+  // txArgs=undefined → no on-chain tx; txArgs=[] → zero-arg tx (pause etc); txArgs=[...] → normal tx
+  _pendingCall = { fn, contract, txArgs: txArgs !== undefined ? txArgs : null };
+
+  document.getElementById('cm-fn').textContent = fn + '()';
+  document.getElementById('cm-contract').textContent = contract;
+
+  const addrEl  = document.getElementById(ADDR_IDS[contract]);
+  const fullAddr = addrEl ? (addrEl.getAttribute('data-full') || addrEl.textContent) : null;
+  const deployed = fullAddr && !fullAddr.includes('Not deployed');
+  document.getElementById('cm-addr').textContent = deployed ? fullAddr : 'Not deployed — run deploy.js first';
+
+  const argsObj = displayArgs || {};
+  document.getElementById('cm-args').innerHTML = Object.keys(argsObj).length
+    ? Object.entries(argsObj).map(([k,v]) =>
+        '<div style="display:flex;gap:12px;padding:3px 0;border-bottom:1px solid #1a1a1a">' +
+        '<span style="color:#555;min-width:130px;font-size:10px;letter-spacing:0.04em">' + k + '</span>' +
+        '<span style="color:var(--teal);font-size:11px;word-break:break-all">' + (v || '—') + '</span></div>'
+      ).join('')
+    : '<div style="color:#444;font-size:11px">No parameters</div>';
+
+  // Wire Execute button state
+  const execBtn = document.getElementById('cm-exec-btn');
+  if (_pendingCall.txArgs !== null && deployed) {
+    execBtn.disabled = false;
+    execBtn.style.opacity = '1';
+    execBtn.textContent = 'Execute via MetaMask →';
+    document.getElementById('cm-hint').textContent = 'Review parameters, then execute via MetaMask or copy into Sequence Builder.';
+  } else if (_pendingCall.txArgs !== null && !deployed) {
+    execBtn.disabled = true;
+    execBtn.style.opacity = '0.4';
+    execBtn.textContent = 'Execute via MetaMask →';
+    document.getElementById('cm-hint').textContent = 'Deploy contracts first (run deploy.js → polygonAmoy), then return here to execute.';
+  } else {
+    execBtn.disabled = true;
+    execBtn.style.opacity = '0.4';
+    execBtn.textContent = 'Use Sequence Builder →';
+    document.getElementById('cm-hint').textContent = 'This operation requires manual input — copy the call data and use Sequence Builder\'s write interface.';
+  }
+
+  // Reset tx result panel
+  document.getElementById('cm-tx-result').style.display = 'none';
+  document.getElementById('cm-tx-hash').textContent = '';
+
+  document.getElementById('call-modal').style.display = 'flex';
+}
+function closeCallModal() {
+  document.getElementById('call-modal').style.display = 'none';
+  _pendingCall = null;
+  // Reset button for next open
+  const execBtn = document.getElementById('cm-exec-btn');
+  if (execBtn) { execBtn.disabled = false; execBtn.style.opacity = '1'; execBtn.textContent = 'Execute via MetaMask →'; }
+}
+function copyCallData() {
+  const fn       = document.getElementById('cm-fn').textContent;
+  const contract = document.getElementById('cm-contract').textContent;
+  const addr     = document.getElementById('cm-addr').textContent;
+  navigator.clipboard.writeText('Contract: ' + contract + '\nAddress: ' + addr + '\nFunction: ' + fn)
+    .then(() => toast('Call data copied to clipboard', 'success'))
+    .catch(() => toast('Copy failed — check browser permissions', 'error'));
+}
+let _lastTxHash = null;
+let _lastChainId = null;
+
+async function execViaMetaMask() {
+  const prov = _activeProvider || window.ethereum;
+  if (!prov) {
+    toast('No wallet connected — click the wallet chip to connect', 'error');
+    return;
+  }
+  if (!_pendingCall || _pendingCall.txArgs === null) {
+    toast('No tx data — use Sequence Builder write interface instead', 'info');
+    return;
+  }
+
+  const { fn, contract, txArgs } = _pendingCall;
+  const abi = ABIS[contract];
+  if (!abi) { toast('ABI not loaded — refresh the page', 'error'); return; }
+
+  const contractAddr = getFullAddr(ADDR_IDS[contract]);
+  if (!contractAddr || contractAddr.includes('Not deployed')) {
+    toast('Contract not deployed — run deploy.js --network polygonAmoy first', 'error');
+    return;
+  }
+
+  const execBtn = document.getElementById('cm-exec-btn');
+
+  try {
+    // ── 1. Check network ────────────────────────────────────────────────
+    const chainHex = await prov.request({ method: 'eth_chainId' });
+    _lastChainId   = parseInt(chainHex, 16);
+    if (_lastChainId !== 80002 && _lastChainId !== 137) {
+      toast('Wrong network (chain ' + _lastChainId + '). Switch to Polygon Amoy (80002) or Mainnet (137).', 'error');
+      return;
+    }
+
+    // ── 2. Request accounts ─────────────────────────────────────────────
+    const accounts = await prov.request({ method: 'eth_requestAccounts' });
+    if (!accounts.length) { toast('No account connected — reconnect wallet', 'error'); return; }
+
+    // ── 3. Encode calldata ──────────────────────────────────────────────
+    const iface = new ethers.utils.Interface(abi);
+    const data  = iface.encodeFunctionData(fn, txArgs);
+
+    // ── 4. Loading state ────────────────────────────────────────────────
+    execBtn.disabled    = true;
+    execBtn.style.opacity = '0.6';
+    execBtn.textContent = 'Waiting for MetaMask…';
+    document.getElementById('cm-tx-result').style.display = 'none';
+
+    // ── 5. Send transaction ─────────────────────────────────────────────
+    const txHash = await prov.request({
+      method: 'eth_sendTransaction',
+      params: [{ from: accounts[0], to: contractAddr, data, chainId: '0x' + _lastChainId.toString(16) }],
+    });
+
+    // ── 6. Success ──────────────────────────────────────────────────────
+    _lastTxHash = txHash;
+    const hashEl = document.getElementById('cm-tx-hash');
+    hashEl.textContent = txHash;
+    document.getElementById('cm-tx-result').style.display = 'block';
+    document.getElementById('cm-hint').textContent = 'Transaction broadcast. It may take 5–15s to confirm on Polygon.';
+    execBtn.textContent  = '✓ Submitted';
+    execBtn.style.opacity = '1';
+    execBtn.disabled = false;
+    toast(fn + '() submitted to ' + (_lastChainId === 137 ? 'Mainnet' : 'Amoy'), 'success');
+
+  } catch (err) {
+    // ── 7. Restore button on error/rejection ────────────────────────────
+    execBtn.disabled    = false;
+    execBtn.style.opacity = '1';
+    execBtn.textContent = 'Execute via MetaMask →';
+    const msg = err.message || String(err);
+    if (msg.includes('User denied') || msg.includes('user rejected')) {
+      toast('Transaction rejected in MetaMask', 'info');
+    } else {
+      toast('MetaMask error: ' + msg.slice(0, 90), 'error');
+    }
+  }
+}
+
+function openTxOnExplorer() {
+  if (!_lastTxHash) return;
+  const base = _lastChainId === 137 ? 'https://polygonscan.com/tx/' : 'https://amoy.polygonscan.com/tx/';
+  window.open(base + _lastTxHash, '_blank');
+}
+
+// ── Navigation ───────────────────────────────────────────────────────────
+function showPage(id) {
+  pages.forEach(p => {
+    const el = document.getElementById('page-' + p);
+    if (el) el.style.display = p === id ? 'block' : 'none';
+  });
+  document.querySelectorAll('.nav-item').forEach(n => {
+    n.classList.remove('active');
+    if (n.getAttribute('onclick') && n.getAttribute('onclick').includes(id)) n.classList.add('active');
+  });
+  window.scrollTo(0, 0);
+}
+
+// ── Modals ───────────────────────────────────────────────────────────────
+function showDistModal()  { document.getElementById('dist-modal').style.display  = 'flex'; }
+function closeDistModal() { document.getElementById('dist-modal').style.display  = 'none'; }
+function showRepayModal() { document.getElementById('repay-modal').style.display = 'flex'; }
+function closeRepayModal(){ document.getElementById('repay-modal').style.display = 'none'; }
+
+// ── Address utilities ────────────────────────────────────────────────────
+function copyAddr(id) {
+  const addr = getFullAddr(id);
+  if (!addr || addr === 'Not deployed') { toast('Contract not yet deployed — run deploy.js first', 'error'); return; }
+  navigator.clipboard.writeText(addr)
+    .then(() => toast('Copied: ' + addr, 'success'))
+    .catch(() => toast('Copy failed', 'error'));
+}
+async function openPolygonscan(contractKey, ref) {
+  const isMainnet = _lastChainId === 137;
+  const base = isMainnet ? 'https://polygonscan.com' : 'https://amoy.polygonscan.com';
+  if (contractKey === 'nft') {
+    const trackAddr = getFullAddr('addr-track');
+    if (!trackAddr || trackAddr === 'Not deployed') {
+      toast('Deploy STDealTrackRecord first to browse soulbound NFTs', 'error');
+      return;
+    }
+    try {
+      const tokenId = await resolveTrackRecordTokenId(ref);
+      if (tokenId !== null) {
+        window.open(base + '/token/' + trackAddr + '?a=' + encodeURIComponent(tokenId), '_blank');
+        return;
+      }
+      toast('Track record not found for ' + ref + ' — opening the collection page instead', 'info');
+    } catch (err) {
+      toast('Could not resolve NFT for ' + ref + ' — opening the collection page instead', 'info');
+    }
+    window.open(base + '/token/' + trackAddr, '_blank');
+    return;
+  }
+  const keyMap = { equity:'STLLCEquityToken', note:'STDealNote', shtx:'SHTXUtilityToken', track:'STDealTrackRecord', loyalty:'KhakiSolLoyalty' };
+  const addr = getFullAddr(ADDR_IDS[keyMap[contractKey]]);
+  if (!addr || addr === 'Not deployed') { toast('Contract not yet deployed — run deploy.js first', 'error'); return; }
+  window.open(base + '/address/' + addr, '_blank');
+}
+
+// ── Refresh ──────────────────────────────────────────────────────────────
+async function refreshData() {
+  toast('Refreshing on-chain data via Sequence Indexer…', 'info');
+  await Promise.all([loadABIs(), loadManifest()]);
+}
+function importToSequence() {
+  window.open('https://sequence.build/project/48396/contracts', '_blank');
+}
+
+// ── Whitelist ────────────────────────────────────────────────────────────
+function showWhitelistForm(addr = '', status = 'true') {
+  showPage('investors');
+  document.getElementById('whitelist-form').style.display = 'block';
+  document.getElementById('wl-address').value = addr;
+  document.getElementById('wl-status').value = status;
+  document.getElementById('wl-address').focus();
+}
+function hideWhitelistForm() {
+  document.getElementById('whitelist-form').style.display = 'none';
+  document.getElementById('wl-address').value = '';
+  document.getElementById('wl-status').value = 'true';
+}
+function callSetWhitelist() {
+  const addr   = document.getElementById('wl-address').value.trim();
+  const status = document.getElementById('wl-status').value;
+  if (!addr || !addr.startsWith('0x') || addr.length < 10) {
+    toast('Enter a valid wallet address (0x…)', 'error'); return;
+  }
+  showCallModal('setWhitelist', 'STLLCEquityToken', {
+    address:  addr,
+    approved: status === 'true' ? 'true (whitelist)' : 'false (revoke)',
+    role:     'COMPLIANCE_ROLE required',
+    notice:   'Reg D 506(c) — verify accreditation off-chain first',
+  }, [addr, status === 'true']);
+}
+
+// ── Distributions ────────────────────────────────────────────────────────
+function callDepositDistribution() {
+  const amount = document.getElementById('dist-amount').value;
+  const ref    = document.getElementById('dist-ref').value.trim();
+  if (!amount || isNaN(amount) || Number(amount) <= 0) {
+    toast('Enter a valid USDC amount', 'error'); return;
+  }
+  showCallModal('depositDistribution', 'STLLCEquityToken', {
+    'amount (USDC)':    '$' + Number(amount).toLocaleString(),
+    'dealRef':          ref || '—',
+    'effect':           'accumulatedPerToken increases · investors can claimRewards()',
+    'prerequisite':     'Approve USDC spend on STLLCEquityToken address first',
+  }, [String(Math.round(Number(amount) * 1e6)), ref || '']);
+  closeDistModal();
+}
+
+// ── Deal note repayment ──────────────────────────────────────────────────
+function callDepositRepayment() {
+  const raw = document.getElementById('repay-amount').value;
+  if (!raw || isNaN(raw) || Number(raw) <= 0) {
+    toast('Enter USDC amount in 6-decimal units (full = 136740000000)', 'error'); return;
+  }
+  const dollars = (Number(raw) / 1e6).toLocaleString('en-US', {style:'currency', currency:'USD'});
+  showCallModal('depositRepayment', 'STDealNote', {
+    'amount (raw 6 dec)': raw,
+    'human value':        dollars,
+    'full repayment':     '$136,740 = 136740000000',
+    'effect':             'Sets matured=true — irreversible. Enables redeem() for all token holders.',
+    'prerequisite':       'Approve USDC on STDealNote address before calling',
+  }, [raw]);
+  closeRepayModal();
+}
+
+// ── KhakiSol ─────────────────────────────────────────────────────────────
+function callMintBadge() {
+  const wallet    = document.getElementById('ks-wallet').value.trim();
+  const badgeType = document.getElementById('ks-badge-type').value;
+  if (!wallet || !wallet.startsWith('0x')) { toast('Enter a valid customer wallet (0x…)', 'error'); return; }
+  showCallModal('mintBadge', 'KhakiSolLoyalty', {
+    customer:  wallet,
+    badgeType: badgeType + ' — ' + (BADGE_NAMES[badgeType] || ''),
+    role:      'MINTER_ROLE required',
+  }, [wallet, parseInt(badgeType)]);
+}
+function callMintSHTX() {
+  const wallet = document.getElementById('ks-wallet').value.trim();
+  const amount = document.getElementById('ks-shtx-amount').value;
+  if (!wallet || !wallet.startsWith('0x')) { toast('Enter a valid customer wallet (0x…)', 'error'); return; }
+  if (!amount || Number(amount) <= 0)      { toast('Enter SHTX amount', 'error'); return; }
+  showCallModal('mintSHTX', 'KhakiSolLoyalty', {
+    customer:    wallet,
+    shtxAmount:  amount + ' (× 1e18 on-chain)',
+    role:        'MINTER_ROLE required',
+  }, [wallet, toWei(amount)]);
+}
+function callMintFoundingMember() {
+  const wallet = document.getElementById('ks-wallet').value.trim();
+  if (!wallet || !wallet.startsWith('0x')) { toast('Enter a valid recipient wallet (0x…)', 'error'); return; }
+  showCallModal('mintFoundingMember', 'KhakiSolLoyalty', {
+    recipient:  wallet,
+    'supply cap': '100 total — check totalSupply(5) before calling',
+    role:        'MINTER_ROLE required',
+  }, [wallet]);
+}
+function callBatchMintBadges() {
+  const raw    = document.getElementById('ks-batch-wallets').value.trim();
+  const badge  = document.getElementById('ks-batch-badge').value;
+  const amount = document.getElementById('ks-batch-amount').value;
+  const wallets = raw.split('\n').map(w => w.trim()).filter(w => w.startsWith('0x'));
+  if (!wallets.length) { toast('Enter at least one valid wallet address (0x…)', 'error'); return; }
+  showCallModal('batchMintBadges', 'KhakiSolLoyalty', {
+    recipients:   wallets.length + ' wallets',
+    badgeType:    badge + ' — ' + (BADGE_NAMES[Number(badge)] || ''),
+    'amount each': amount,
+    role:          'MINTER_ROLE required',
+  }, [wallets, parseInt(badge), parseInt(amount) || 1]);
+}
+function callCreateProductDrop() {
+  const name   = document.getElementById('ks-drop-name').value.trim();
+  const sku    = document.getElementById('ks-drop-sku').value.trim();
+  const supply = document.getElementById('ks-drop-supply').value;
+  const price  = document.getElementById('ks-drop-price').value;
+  const uri    = document.getElementById('ks-drop-uri').value.trim();
+  if (!name || !sku) { toast('Enter drop name and SKU', 'error'); return; }
+  showCallModal('createProductDrop', 'KhakiSolLoyalty', {
+    name, sku,
+    maxSupply:      supply || '—',
+    priceUSDCents:  price ? price + ' ($' + (Number(price)/100).toFixed(2) + ')' : '—',
+    tokenURI:       uri || 'ipfs://Qm…',
+    role:           'DEFAULT_ADMIN_ROLE required',
+  }, [name, sku, parseInt(supply) || 0, parseInt(price) || 0, uri || '']);
+}
+function callMintProductNFT() {
+  const buyer   = document.getElementById('ks-nft-buyer').value.trim();
+  const tokenId = document.getElementById('ks-nft-tokenid').value;
+  if (!buyer || !buyer.startsWith('0x')) { toast('Enter a valid buyer wallet (0x…)', 'error'); return; }
+  if (!tokenId || parseInt(tokenId) < 6)  { toast('Token ID must be 6 or higher (IDs 1–5 are badge tiers)', 'error'); return; }
+  showCallModal('mintProductNFT', 'KhakiSolLoyalty', {
+    buyer:   buyer,
+    tokenId: tokenId + ' (must be 6+)',
+    role:    'MINTER_ROLE required',
+  }, [buyer, parseInt(tokenId)]);
+}
+
+// ── KhakiSol admin ────────────────────────────────────────────────────────
+function callPauseKhakiSol() {
+  showCallModal('pause', 'KhakiSolLoyalty', {
+    effect: 'Halts all minting and transfers',
+    role:   'PAUSER_ROLE required',
+  }, []);
+}
+function callUnpauseKhakiSol() {
+  showCallModal('unpause', 'KhakiSolLoyalty', {
+    effect: 'Resumes minting and transfers',
+    role:   'PAUSER_ROLE required',
+  }, []);
+}
+function callSetRoyalty() {
+  const recipient = document.getElementById('ks-royalty-recipient').value.trim();
+  const bps       = document.getElementById('ks-royalty-bps').value;
+  if (!recipient || !recipient.startsWith('0x')) { toast('Enter a valid royalty recipient address (0x…)', 'error'); return; }
+  if (!bps || isNaN(bps) || Number(bps) < 0 || Number(bps) > 1000) { toast('BPS must be 0–1000 (1000 = 10%)', 'error'); return; }
+  showCallModal('setRoyalty', 'KhakiSolLoyalty', {
+    recipient: recipient,
+    bps:       bps + ' (' + (Number(bps) / 100).toFixed(2) + '%)',
+    role:      'DEFAULT_ADMIN_ROLE required',
+    note:      'Applies to ERC-2981 secondary sales on product NFTs',
+  }, [recipient, parseInt(bps)]);
+}
+function callGrantRoleKhakiSol() {
+  const wallet = document.getElementById('ks-role-wallet').value.trim();
+  const role   = document.getElementById('ks-role-select').value;
+  if (!wallet || !wallet.startsWith('0x')) { toast('Enter a valid wallet address (0x…)', 'error'); return; }
+  const roleHash = ROLE_HASHES[role];
+  showCallModal('grantRole', 'KhakiSolLoyalty', {
+    role:    role.toUpperCase().replace('_', '_ROLE — ') + roleHash.slice(0, 12) + '…',
+    wallet:  wallet,
+    effect:  'Grants ' + role.toUpperCase() + ' to the wallet',
+    caution: 'DEFAULT_ADMIN_ROLE required — irreversible without revokeRole()',
+  }, [roleHash, wallet]);
+}
+function callRevokeRoleKhakiSol() {
+  const wallet = document.getElementById('ks-role-wallet').value.trim();
+  const role   = document.getElementById('ks-role-select').value;
+  if (!wallet || !wallet.startsWith('0x')) { toast('Enter a valid wallet address (0x…)', 'error'); return; }
+  const roleHash = ROLE_HASHES[role];
+  showCallModal('revokeRole', 'KhakiSolLoyalty', {
+    role:    role.toUpperCase() + ' — ' + roleHash.slice(0, 12) + '…',
+    wallet:  wallet,
+    effect:  'Removes ' + role.toUpperCase() + ' from the wallet',
+    caution: 'DEFAULT_ADMIN_ROLE required',
+  }, [roleHash, wallet]);
+}
+
+// ── SHTX ─────────────────────────────────────────────────────────────────
+function callMintSHTXToken() {
+  const recipient = document.getElementById('shtx-recipient').value.trim();
+  const amount    = document.getElementById('shtx-amount').value;
+  const reason    = document.getElementById('shtx-reason').value.trim();
+  if (!recipient || !recipient.startsWith('0x')) { toast('Enter a valid recipient wallet (0x…)', 'error'); return; }
+  if (!amount || Number(amount) <= 0)            { toast('Enter a valid SHTX amount', 'error'); return; }
+  showCallModal('mint', 'SHTXUtilityToken', {
+    to:            recipient,
+    'amount (SHTX)': amount,
+    reason:        reason || '—',
+    'daily limit': '10,000 SHTX per minter — resets at midnight UTC',
+    role:          'MINTER_ROLE required',
+  }, [recipient, toWei(amount), reason || '']);
+}
+async function calcPurchaseReward() {
+  const cents = document.getElementById('shtx-purchase-cents').value;
+  const resultEl = document.getElementById('purchase-reward-result');
+  if (!cents || isNaN(cents) || Number(cents) <= 0) {
+    toast('Enter a purchase amount in USD cents first', 'error');
+    resultEl.textContent = 'Enter a purchase amount in cents first.';
+    return;
+  }
+
+  try {
+    const contract = await getReadContract('SHTXUtilityToken');
+    const rewardWei = await contract.calculatePurchaseReward(parseInt(cents, 10));
+    const reward = ethers.utils.commify(ethers.utils.formatEther(rewardWei));
+    resultEl.innerHTML =
+      '<div style="margin-bottom:6px"><span style="color:var(--steel)">Purchase: </span>$' + (Number(cents) / 100).toFixed(2) + ' (' + Number(cents).toLocaleString() + ' cents)</div>' +
+      '<div><span style="color:var(--steel)">Reward: </span><span style="color:var(--teal)">' + reward + ' SHTX</span></div>';
+    toast('calculatePurchaseReward() loaded from contract', 'success');
+  } catch (err) {
+    const reward = (Number(cents) * 10 / 100).toLocaleString();
+    resultEl.innerHTML =
+      '<div style="margin-bottom:6px"><span style="color:var(--steel)">Preview: </span>$' + (Number(cents) / 100).toFixed(2) + '</div>' +
+      '<div><span style="color:var(--steel)">Reward at default rate: </span><span style="color:var(--amber)">' + reward + ' SHTX</span></div>';
+    toast('Live contract lookup unavailable — showing default-rate preview', 'info');
+  }
+}
+async function callGetTier() {
+  const wallet = document.getElementById('shtx-tier-wallet').value.trim();
+  if (!wallet || !wallet.startsWith('0x')) { toast('Enter a valid wallet address (0x…)', 'error'); return; }
+  const el = document.getElementById('tier-result');
+  try {
+    const contract = await getReadContract('SHTXUtilityToken');
+    const tier = await contract.getTier(wallet);
+    const tierName = tier.tierName || tier[0];
+    const benefit = tier.benefit || tier[1];
+    el.innerHTML =
+      '<div style="margin-bottom:6px"><span style="color:var(--steel)">Wallet: </span>' + wallet.slice(0,10) + '…' + wallet.slice(-6) + '</div>' +
+      '<div style="margin-bottom:6px"><span style="color:var(--steel)">Live tier: </span><span style="color:var(--teal)">' + tierName + '</span></div>' +
+      '<div><span style="color:var(--steel)">Benefit: </span>' + benefit + '</div>';
+    toast('getTier() loaded from contract', 'success');
+  } catch (err) {
+    el.innerHTML = '<span style="color:var(--amber)">Contract not deployed or ABI unavailable — deploy SHTXUtilityToken first, then retry getTier(' + wallet.slice(0,10) + '…)</span>';
+    toast('Deploy SHTXUtilityToken first to read live tier', 'error');
+  }
+}
+
+// ── SHTX admin ────────────────────────────────────────────────────────────
+function callPauseSHTX() {
+  showCallModal('pause', 'SHTXUtilityToken', {
+    effect: 'Halts all minting and transfers',
+    role:   'PAUSER_ROLE required',
+  }, []);
+}
+function callUnpauseSHTX() {
+  showCallModal('unpause', 'SHTXUtilityToken', {
+    effect: 'Resumes minting and transfers',
+    role:   'PAUSER_ROLE required',
+  }, []);
+}
+function callSetRewardRate() {
+  const rate = document.getElementById('shtx-reward-rate').value;
+  if (!rate || isNaN(rate) || Number(rate) <= 0) { toast('Enter a valid reward rate (SHTX units per 100 USD cents)', 'error'); return; }
+  showCallModal('setRewardRate', 'SHTXUtilityToken', {
+    rate:    rate + ' SHTX per 100 USD cents',
+    example: 'rate=1000 → 10 SHTX per $1 purchase',
+    role:    'DEFAULT_ADMIN_ROLE required',
+  }, [parseInt(rate)]);
+}
+function callGrantRoleSHTX() {
+  const wallet = document.getElementById('shtx-role-wallet').value.trim();
+  const role   = document.getElementById('shtx-role-select').value;
+  if (!wallet || !wallet.startsWith('0x')) { toast('Enter a valid wallet address (0x…)', 'error'); return; }
+  const roleHash = ROLE_HASHES[role];
+  showCallModal('grantRole', 'SHTXUtilityToken', {
+    role:    role.toUpperCase() + ' — ' + roleHash.slice(0, 12) + '…',
+    wallet:  wallet,
+    effect:  'Grants ' + role.toUpperCase() + ' to the wallet',
+    caution: 'DEFAULT_ADMIN_ROLE required',
+  }, [roleHash, wallet]);
+}
+function callRevokeRoleSHTX() {
+  const wallet = document.getElementById('shtx-role-wallet').value.trim();
+  const role   = document.getElementById('shtx-role-select').value;
+  if (!wallet || !wallet.startsWith('0x')) { toast('Enter a valid wallet address (0x…)', 'error'); return; }
+  const roleHash = ROLE_HASHES[role];
+  showCallModal('revokeRole', 'SHTXUtilityToken', {
+    role:    role.toUpperCase() + ' — ' + roleHash.slice(0, 12) + '…',
+    wallet:  wallet,
+    effect:  'Removes ' + role.toUpperCase() + ' from the wallet',
+    caution: 'DEFAULT_ADMIN_ROLE required',
+  }, [roleHash, wallet]);
+}
+function callBurnSHTX() {
+  const amount = document.getElementById('shtx-burn-amount').value;
+  if (!amount || isNaN(amount) || Number(amount) <= 0) { toast('Enter a valid SHTX amount to burn', 'error'); return; }
+  showCallModal('burn', 'SHTXUtilityToken', {
+    amount:  amount + ' SHTX',
+    'raw wei': toWei(amount),
+    effect:  'Permanently destroys tokens from connected wallet',
+    caution: 'Irreversible',
+  }, [toWei(amount)]);
+}
+function callBurnFromSHTX() {
+  const wallet = document.getElementById('shtx-burnfrom-wallet').value.trim();
+  const amount = document.getElementById('shtx-burn-amount').value;
+  if (!wallet || !wallet.startsWith('0x')) { toast('Enter the wallet to burn from (0x…)', 'error'); return; }
+  if (!amount || isNaN(amount) || Number(amount) <= 0) { toast('Enter a valid SHTX amount to burn', 'error'); return; }
+  showCallModal('burnFrom', 'SHTXUtilityToken', {
+    from:    wallet,
+    amount:  amount + ' SHTX',
+    'raw wei': toWei(amount),
+    caution: 'Requires approval from the wallet first — irreversible',
+  }, [wallet, toWei(amount)]);
+}
+
+// ── Deal manage ───────────────────────────────────────────────────────────
+function showManageDeal(dealId) {
+  const noteAddr = getFullAddr('addr-note');
+  showCallModal('info', 'STDealNote', {
+    'Deal ID':     dealId,
+    'Note address': (noteAddr && noteAddr !== 'Not deployed') ? noteAddr : 'Not deployed',
+    'Actions':     'issueTokens(investor, amount) · setWhitelist(addr, true)',
+    'Repayment':   'depositRepayment(136740000000) to trigger maturity',
+    'Tip':         'Use Sequence Builder write interface for all state changes',
+  });
+}
+
+// ── Investor manage ───────────────────────────────────────────────────────
+function showManageInvestor(addr) {
+  showWhitelistForm(addr, 'true');
+  toast('Whitelist form prefilled for ' + addr, 'info');
+}
+function showReviewKYC(addr) {
+  showWhitelistForm(addr, 'true');
+  toast('Review accreditation off-chain, then submit setWhitelist(' + addr + ', true)', 'info');
+}
+
+// ── ABI loader ────────────────────────────────────────────────────────────
+async function loadABIs() {
+  const CACHE_KEY = 'stllcweb3_abis_v1';
+  const paths = {
+    STLLCEquityToken:  '/artifacts/contracts/core/STLLCEquityToken.sol/STLLCEquityToken.json',
+    STDealNote:        '/artifacts/contracts/core/STDealNote.sol/STDealNote.json',
+    SHTXUtilityToken:  '/artifacts/contracts/core/SHTXUtilityToken.sol/SHTXUtilityToken.json',
+    STDealTrackRecord: '/artifacts/contracts/core/STDealTrackRecord.sol/STDealTrackRecord.json',
+    KhakiSolLoyalty:   '/artifacts/contracts/core/KhakiSolLoyalty.sol/KhakiSolLoyalty.json',
+  };
+
+  // Try fetching fresh ABIs from artifacts
+  const results = await Promise.all(Object.entries(paths).map(async ([name, path]) => {
+    try {
+      const res = await fetch(path);
+      if (res.ok) { const j = await res.json(); ABIS[name] = j.abi; return true; }
+      console.error(`[loadABIs] HTTP ${res.status} fetching ${name} from ${path}`);
+      return false;
+    } catch(e) {
+      console.error(`[loadABIs] Failed to load ${name}:`, e.message);
+      return false;
+    }
+  }));
+
+  const loaded = Object.keys(paths).filter((_, i) => results[i]);
+  const failed = Object.keys(paths).filter((_, i) => !results[i]);
+
+  // Cache successfully loaded ABIs
+  if (loaded.length) {
+    try { localStorage.setItem(CACHE_KEY, JSON.stringify(ABIS)); } catch(_) {}
+  }
+
+  // Fall back to cache for any that failed
+  if (failed.length) {
+    try {
+      const cached = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}');
+      failed.forEach(name => { if (cached[name]) { ABIS[name] = cached[name]; } });
+      const stillMissing = failed.filter(name => !ABIS[name]);
+      if (stillMissing.length) toast(`ABI load failed: ${stillMissing.join(', ')} — run: npm run compile`, 'error');
+      else if (failed.length) console.warn('[loadABIs] Using cached ABIs for:', failed.join(', '));
+    } catch(_) {
+      toast(`ABI load failed: ${failed.join(', ')} — run: npm run compile`, 'error');
+    }
+  }
+}
+
+// ── Deployment manifest ────────────────────────────────────────────────────
+async function loadManifest() {
+  const tryPaths = ['/deployments/polygonAmoy.json', '/deployments/hardhat.json'];
+  for (const path of tryPaths) {
+    try {
+      const res = await fetch(path);
+      if (!res.ok) continue;
+      const data = await res.json();
+      const c = data.contracts;
+      const setAddr = (id, addr) => {
+        const el = document.getElementById(id);
+        if (el && addr) {
+          el.setAttribute('data-full', addr);
+          el.title = addr;
+          el.textContent = addr.slice(0,10) + '…' + addr.slice(-6);
+        }
+      };
+      setAddr('addr-equity',  c.STLLCEquityToken && c.STLLCEquityToken.proxy);
+      setAddr('addr-note',    c.STDealNote008);
+      setAddr('addr-shtx',    c.SHTXUtilityToken);
+      setAddr('addr-track',   c.STDealTrackRecord);
+      setAddr('addr-loyalty', c.KhakiSolLoyalty);
+      // Admin console address badges
+      const setCode = (id, addr) => {
+        const el = document.getElementById(id);
+        if (el && addr) { el.setAttribute('data-full', addr); el.title = addr; el.textContent = addr.slice(0,10) + '…' + addr.slice(-6); }
+      };
+      setCode('admin-addr-equity', c.STLLCEquityToken && c.STLLCEquityToken.proxy);
+      setCode('admin-addr-note',   c.STDealNote008);
+      setCode('admin-addr-track',  c.STDealTrackRecord);
+      const netEl = document.querySelector('.net-badge');
+      _manifestChainId = data.chainId;
+      if (netEl && !window.ethereum) netEl.textContent = data.network.toUpperCase() + ' · ' + data.chainId;
+      console.log('[loadManifest] Loaded from', path, '— network:', data.network, 'chainId:', data.chainId);
+      break;
+    } catch(e) {
+      console.error('[loadManifest] Failed to load', path, ':', e.message);
+    }
+  }
+  if (!Object.values(ABIS).length) {
+    console.warn('[loadManifest] No deployment manifest found — contract addresses will not populate');
+  }
+}
+
+// ── STLLCEquityToken admin ───────────────────────────────────────────────
+function callPauseEquity() {
+  showCallModal('pause', 'STLLCEquityToken', { effect: 'Halts all transfers and distributions', role: 'PAUSER_ROLE required' }, []);
+}
+function callUnpauseEquity() {
+  showCallModal('unpause', 'STLLCEquityToken', { effect: 'Resumes transfers and distributions', role: 'PAUSER_ROLE required' }, []);
+}
+function callEmergencyWithdraw() {
+  const to     = document.getElementById('eq-ew-to').value.trim();
+  const amount = document.getElementById('eq-ew-amount').value;
+  if (!to || !to.startsWith('0x'))          { toast('Enter a valid recipient address (0x…)', 'error'); return; }
+  if (!amount || Number(amount) <= 0)        { toast('Enter USDC amount in 6-decimal units', 'error'); return; }
+  showCallModal('emergencyWithdraw', 'STLLCEquityToken', {
+    to, 'amount (6 dec)': amount,
+    'human value': '$' + (Number(amount) / 1e6).toLocaleString('en-US', {minimumFractionDigits:2}),
+    caution: 'IRREVERSIBLE — DEFAULT_ADMIN_ROLE required',
+  }, [to, amount]);
+}
+function callUpgradeTo() {
+  const impl = document.getElementById('eq-upgrade-impl').value.trim();
+  if (!impl || !impl.startsWith('0x')) { toast('Enter the new implementation contract address (0x…)', 'error'); return; }
+  showCallModal('upgradeTo', 'STLLCEquityToken', {
+    newImplementation: impl,
+    caution: 'UUPS upgrade — UPGRADER_ROLE required — verify bytecode before submitting',
+  }, [impl]);
+}
+function callDistributeTokens() {
+  const investor = document.getElementById('eq-dist-investor').value.trim();
+  const amount   = document.getElementById('eq-dist-amount').value;
+  if (!investor || !investor.startsWith('0x')) { toast('Enter a valid investor wallet (0x…)', 'error'); return; }
+  if (!amount || Number(amount) <= 0)           { toast('Enter a token amount', 'error'); return; }
+  showCallModal('distributeInvestorTokens', 'STLLCEquityToken', {
+    investor, amount: amount + ' STLLC',
+    'must be whitelisted': 'setWhitelist(investor, true) first',
+    role: 'MANAGER_ROLE required',
+  }, [investor, toWei(amount)]);
+}
+function callGrantRoleEquity() {
+  const wallet = document.getElementById('eq-role-wallet').value.trim();
+  const role   = document.getElementById('eq-role-select').value;
+  if (!wallet || !wallet.startsWith('0x')) { toast('Enter a valid wallet address (0x…)', 'error'); return; }
+  showCallModal('grantRole', 'STLLCEquityToken', {
+    role: role.toUpperCase(), wallet, role_hash: ROLE_HASHES[role].slice(0,14) + '…',
+  }, [ROLE_HASHES[role], wallet]);
+}
+function callRevokeRoleEquity() {
+  const wallet = document.getElementById('eq-role-wallet').value.trim();
+  const role   = document.getElementById('eq-role-select').value;
+  if (!wallet || !wallet.startsWith('0x')) { toast('Enter a valid wallet address (0x…)', 'error'); return; }
+  showCallModal('revokeRole', 'STLLCEquityToken', {
+    role: role.toUpperCase(), wallet, caution: 'DEFAULT_ADMIN_ROLE required',
+  }, [ROLE_HASHES[role], wallet]);
+}
+function callBatchSetWhitelist() {
+  const raw    = document.getElementById('eq-batch-wallets').value.trim();
+  const status = document.getElementById('eq-batch-status').value === 'true';
+  const wallets = raw.split('\n').map(w => w.trim()).filter(w => w.startsWith('0x') && w.length >= 42);
+  if (!wallets.length) { toast('Enter at least one valid wallet address (0x…)', 'error'); return; }
+  showCallModal('batchSetWhitelist', 'STLLCEquityToken', {
+    count: wallets.length + ' wallets',
+    status: status ? 'true (approve all)' : 'false (revoke all)',
+    role: 'COMPLIANCE_ROLE required',
+    note: 'Reg D 506(c) — verify accreditation off-chain first',
+  }, [wallets, status]);
+}
+function callCreateProposal() {
+  const desc   = document.getElementById('eq-prop-desc').value.trim();
+  const period = document.getElementById('eq-prop-period').value;
+  if (!desc)                               { toast('Enter a proposal description', 'error'); return; }
+  if (!period || Number(period) <= 0)      { toast('Enter voting period in seconds (e.g. 604800 = 7 days)', 'error'); return; }
+  showCallModal('createProposal', 'STLLCEquityToken', {
+    description: desc,
+    votingPeriod: period + 's (' + (Number(period) / 86400).toFixed(1) + ' days)',
+    threshold: 'proposalThreshold() STLLC required to propose',
+  }, [desc, parseInt(period)]);
+}
+function callCastVoteFor() {
+  const id = document.getElementById('eq-vote-id').value;
+  if (id === '' || isNaN(id)) { toast('Enter a proposal ID', 'error'); return; }
+  showCallModal('castVote', 'STLLCEquityToken', {
+    proposalId: id, support: 'true (FOR)',
+    weight: 'votes weighted by STLLC balance at proposal creation',
+  }, [parseInt(id), true]);
+}
+function callCastVoteAgainst() {
+  const id = document.getElementById('eq-vote-id').value;
+  if (id === '' || isNaN(id)) { toast('Enter a proposal ID', 'error'); return; }
+  showCallModal('castVote', 'STLLCEquityToken', {
+    proposalId: id, support: 'false (AGAINST)',
+  }, [parseInt(id), false]);
+}
+
+// ── STDealNote admin ──────────────────────────────────────────────────────
+function callPauseDealNote() {
+  showCallModal('pause', 'STDealNote', { effect: 'Halts transfers and redemptions', role: 'PAUSER_ROLE required' }, []);
+}
+function callUnpauseDealNote() {
+  showCallModal('unpause', 'STDealNote', { effect: 'Resumes transfers and redemptions', role: 'PAUSER_ROLE required' }, []);
+}
+function callIssueTokens() {
+  const investor = document.getElementById('dn-issue-investor').value.trim();
+  const amount   = document.getElementById('dn-issue-amount').value;
+  if (!investor || !investor.startsWith('0x')) { toast('Enter a valid investor wallet (0x…)', 'error'); return; }
+  if (!amount || Number(amount) <= 0)           { toast('Enter a token amount', 'error'); return; }
+  const faceTotal = (Number(amount) * 100).toLocaleString('en-US', {style:'currency', currency:'USD'});
+  showCallModal('issueTokens', 'STDealNote', {
+    investor, tokens: amount,
+    'face value total': faceTotal,
+    'repayment total': '$' + (Number(amount) * 106).toLocaleString(),
+    role: 'MANAGER_ROLE required — investor must be whitelisted',
+  }, [investor, toWei(amount)]);
+}
+function callGrantRoleDealNote() {
+  const wallet = document.getElementById('dn-role-wallet').value.trim();
+  const role   = document.getElementById('dn-role-select').value;
+  if (!wallet || !wallet.startsWith('0x')) { toast('Enter a valid wallet address (0x…)', 'error'); return; }
+  showCallModal('grantRole', 'STDealNote', {
+    role: role.toUpperCase(), wallet,
+  }, [ROLE_HASHES[role], wallet]);
+}
+function callRevokeRoleDealNote() {
+  const wallet = document.getElementById('dn-role-wallet').value.trim();
+  const role   = document.getElementById('dn-role-select').value;
+  if (!wallet || !wallet.startsWith('0x')) { toast('Enter a valid wallet address (0x…)', 'error'); return; }
+  showCallModal('revokeRole', 'STDealNote', {
+    role: role.toUpperCase(), wallet, caution: 'DEFAULT_ADMIN_ROLE required',
+  }, [ROLE_HASHES[role], wallet]);
+}
+function callRedeemNote() {
+  const amount = document.getElementById('dn-redeem-amount').value;
+  if (!amount || Number(amount) <= 0) { toast('Enter token amount to redeem', 'error'); return; }
+  showCallModal('redeem', 'STDealNote', {
+    tokens: amount,
+    'USDC received': '$' + (Number(amount) * 106).toLocaleString() + ' (repaymentPerToken × amount)',
+    prerequisite: 'Contract must be matured (depositRepayment() called first)',
+  }, [toWei(amount)]);
+}
+
+// ── STDealTrackRecord admin ───────────────────────────────────────────────
+function callVerifyDeal() {
+  const tokenId = document.getElementById('tr-verify-id').value;
+  if (tokenId === '' || isNaN(tokenId)) { toast('Enter a token ID to verify', 'error'); return; }
+  showCallModal('verifyDeal', 'STDealTrackRecord', {
+    tokenId: tokenId,
+    effect: 'Sets verified[tokenId] = true on-chain',
+    role: 'VERIFIER_ROLE required (title company wallet)',
+  }, [parseInt(tokenId)]);
+}
+function callGrantRoleTrackRecord() {
+  const wallet = document.getElementById('tr-role-wallet').value.trim();
+  const role   = document.getElementById('tr-role-select').value;
+  if (!wallet || !wallet.startsWith('0x')) { toast('Enter a valid wallet address (0x…)', 'error'); return; }
+  showCallModal('grantRole', 'STDealTrackRecord', {
+    role: role.toUpperCase(), wallet,
+  }, [ROLE_HASHES[role], wallet]);
+}
+function callRevokeRoleTrackRecord() {
+  const wallet = document.getElementById('tr-role-wallet').value.trim();
+  const role   = document.getElementById('tr-role-select').value;
+  if (!wallet || !wallet.startsWith('0x')) { toast('Enter a valid wallet address (0x…)', 'error'); return; }
+  showCallModal('revokeRole', 'STDealTrackRecord', {
+    role: role.toUpperCase(), wallet, caution: 'DEFAULT_ADMIN_ROLE required',
+  }, [ROLE_HASHES[role], wallet]);
+}
+function callMintDealRecord() {
+  const recipient = document.getElementById('tr-recipient').value.trim();
+  const tokenURI  = document.getElementById('tr-tokenuri').value.trim();
+  const dealId    = document.getElementById('tr-dealid').value.trim();
+  const propAddr  = document.getElementById('tr-propaddr').value.trim();
+  const county    = document.getElementById('tr-county').value.trim();
+  const dealType  = document.getElementById('tr-dealtype').value;
+  const purchase  = document.getElementById('tr-purchase').value;
+  const arv       = document.getElementById('tr-arv').value;
+  const profit    = document.getElementById('tr-profit').value;
+  const days      = document.getElementById('tr-daysclose').value;
+  const retBps    = document.getElementById('tr-returnbps').value;
+  const ipfsHash  = document.getElementById('tr-ipfshash').value.trim();
+  const titleVerified = document.getElementById('tr-titleverified').checked;
+
+  if (!recipient || !recipient.startsWith('0x')) { toast('Enter a valid recipient wallet (0x…)', 'error'); return; }
+  if (!dealId)    { toast('Enter a Deal ID (e.g. ST-DEAL-008)', 'error'); return; }
+  if (!propAddr)  { toast('Enter the property address', 'error'); return; }
+  if (!purchase || !arv || !profit) { toast('Enter purchase price, ARV, and net profit', 'error'); return; }
+
+  const closedAt = Math.floor(Date.now() / 1000);
+  showCallModal('mintDealRecord', 'STDealTrackRecord', {
+    recipient, dealId, propertyAddress: propAddr,
+    dealType, purchasePrice: '$' + Number(purchase).toLocaleString(),
+    arv: '$' + Number(arv).toLocaleString(), netProfit: '$' + Number(profit).toLocaleString(),
+    investorReturn: (Number(retBps || 0) / 100).toFixed(2) + '%',
+    titleVerified: titleVerified ? 'YES' : 'NO',
+    role: 'MINTER_ROLE required',
+  }, [recipient, tokenURI || '', {
+    dealId, propertyAddress: propAddr, county: county || '',
+    dealType, purchasePriceUSD: String(Math.round(Number(purchase))),
+    arvUSD: String(Math.round(Number(arv))),
+    netProfitUSD: String(Math.round(Number(profit))),
+    daysToClose: String(Math.round(Number(days || 0))),
+    investorReturnBps: String(Math.round(Number(retBps || 0))),
+    closedAt: String(closedAt),
+    verifiedByTitle: titleVerified,
+    ipfsDocHash: ipfsHash || '',
+  }]);
+}
+
+// ── Wallet connection ──────────────────────────────────────────────────────
+async function _initWeb3Auth() {
+  // @web3auth/modal UMD exposes window.Modal
+  const Pkg = window.Modal || window.Web3Auth;
+  if (!Pkg) return;
+  const W3A = Pkg.Web3Auth || Pkg;
+  const NET = Pkg.WEB3AUTH_NETWORK || {};
+  try {
+    _web3auth = new W3A({
+      clientId: WEB3AUTH_CLIENT_ID,
+      web3AuthNetwork: NET.SAPPHIRE_DEVNET || 'sapphire_devnet',
+      chainConfig: {
+        chainNamespace: 'eip155',
+        chainId: '0x13882', // 80002 Polygon Amoy
+        rpcTarget: 'https://polygon-amoy.g.alchemy.com/v2/PJNEmFraZPsFRB13V9zCI',
+        displayName: 'Polygon Amoy Testnet',
+        blockExplorerUrl: 'https://amoy.polygonscan.com',
+        ticker: 'MATIC',
+        tickerName: 'MATIC',
+      },
+    });
+    await _web3auth.initModal();
+    if (_web3auth.connected) {
+      _activeProvider = _web3auth.provider;
+      const accounts = await _activeProvider.request({ method: 'eth_accounts' });
+      if (accounts.length) {
+        _updateWalletUI(accounts[0]);
+        const chainId = await _activeProvider.request({ method: 'eth_chainId' });
+        _updateNetworkUI(parseInt(chainId, 16));
+      }
+    }
+  } catch (e) {
+    console.warn('Web3Auth init failed, falling back to MetaMask:', e.message);
+    _web3auth = null; // ensure MetaMask fallback path is taken in connectWallet()
+  }
+}
+
+async function connectWallet() {
+  // ── Web3Auth modal (social / email / external wallets) ──
+  if (_web3auth) {
+    try {
+      const provider = await _web3auth.connect();
+      _activeProvider = provider;
+      const accounts = await _activeProvider.request({ method: 'eth_accounts' });
+      _updateWalletUI(accounts[0]);
+      const chainId = await _activeProvider.request({ method: 'eth_chainId' });
+      _updateNetworkUI(parseInt(chainId, 16));
+      toast('Connected: ' + accounts[0].slice(0,6) + '…' + accounts[0].slice(-4), 'success');
+    } catch (err) {
+      const msg = err.message || '';
+      if (!msg.includes('User closed') && !msg.includes('cancelled') && !msg.includes('rejected')) {
+        toast('Connection failed: ' + msg, 'error');
+      }
+    }
+    return;
+  }
+  // ── MetaMask fallback (Web3Auth SDK not loaded) ──
+  if (!window.ethereum) {
+    toast('No wallet available — install MetaMask or reload to try Web3Auth', 'error');
+    return;
+  }
+  try {
+    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    _activeProvider = window.ethereum;
+    _updateWalletUI(accounts[0]);
+    const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+    _updateNetworkUI(parseInt(chainId, 16));
+    toast('Connected: ' + accounts[0].slice(0,6) + '…' + accounts[0].slice(-4), 'success');
+  } catch (err) {
+    toast('Connection rejected', 'error');
+  }
+}
+function _updateWalletUI(addr) {
+  const el = document.getElementById('walletAddr');
+  if (el) el.textContent = addr.slice(0,6) + '…' + addr.slice(-4);
+}
+function _updateNetworkUI(chainNum) {
+  _lastChainId = chainNum;
+  const badge = document.querySelector('.net-badge');
+  if (!badge) return;
+  if      (chainNum === 80002) { badge.textContent = 'POLYGON AMOY TESTNET'; badge.style.background = 'var(--teal)'; }
+  else if (chainNum === 137)   { badge.textContent = 'POLYGON MAINNET';      badge.style.background = 'var(--teal)'; }
+  else {
+    badge.textContent = 'CHAIN ' + chainNum;
+    badge.style.background = 'var(--amber)';
+    toast('Wrong network (chain ' + chainNum + '). Switch to Polygon Amoy (80002) or Mainnet (137).', 'error');
+  }
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────
+(async () => {
+  const el = document.getElementById('walletAddr');
+  el.textContent = 'Connecting…';
+
+  // Try Web3Auth first (restores previous session if any)
+  await _initWeb3Auth();
+
+  if (!_activeProvider) {
+    // Web3Auth not available or not previously connected — try silent MetaMask
+    if (window.ethereum) {
+      try {
+        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+        if (accounts.length) {
+          _activeProvider = window.ethereum;
+          _updateWalletUI(accounts[0]);
+          const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+          _updateNetworkUI(parseInt(chainId, 16));
+        } else {
+          el.textContent = 'Click to connect';
+        }
+      } catch (_) { el.textContent = 'Click to connect'; }
+      window.ethereum.on('accountsChanged', accs => {
+        if (accs.length) { _activeProvider = window.ethereum; _updateWalletUI(accs[0]); }
+        else { _activeProvider = null; el.textContent = 'Click to connect'; }
+      });
+      window.ethereum.on('chainChanged', c => _updateNetworkUI(parseInt(c, 16)));
+    } else {
+      el.textContent = 'Click to connect';
+    }
+  }
+})();
+
+loadABIs();
+loadManifest();
+showPage('dashboard');
+</script>
+</body>
+</html>

@@ -1,0 +1,93 @@
+# stllcweb3 — Docker Compose
+# Services: webhook receiver, n8n automation, Redis, frontend dashboard
+#
+# Port assignments (no conflicts with other local projects):
+#   4041  → webhook-server  (Alchemy webhook receiver)
+#   5680  → n8n             (5678 = ultimate-dynasty-os, 5679 = docker-n8n)
+#   6381  → redis           (6379 = redis-realtor, 6380 = dynasty-os-redis)
+#   3031  → frontend        (dashboard static server)
+
+services:
+
+  # ---------------------------------------------------------------------------
+  # WEBHOOK SERVER — receives Alchemy Notify events on-chain
+  # ---------------------------------------------------------------------------
+  webhook-server:
+    container_name: stllcweb3-webhook
+    image: node:20-alpine
+    working_dir: /app
+    command: node alchemy/webhook-server.js
+    ports:
+      - "4041:4041"
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+      - /app/node_modules
+    restart: unless-stopped
+    networks:
+      - stllcweb3
+
+  # ---------------------------------------------------------------------------
+  # N8N — workflow automation for Shopify → minting pipeline
+  # ---------------------------------------------------------------------------
+  n8n:
+    container_name: stllcweb3-n8n
+    image: n8nio/n8n:latest
+    ports:
+      - "5680:5678"
+    env_file:
+      - .env
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=admin
+      - N8N_BASIC_AUTH_PASSWORD=changeme
+      - EXECUTIONS_MODE=queue
+      - QUEUE_BULL_REDIS_HOST=redis
+      - QUEUE_BULL_REDIS_PORT=6379
+      - N8N_QUEUE_BULL_REDIS_HOST=redis
+    volumes:
+      - n8n_data:/home/node/.n8n
+    depends_on:
+      - redis
+    restart: unless-stopped
+    networks:
+      - stllcweb3
+
+  # ---------------------------------------------------------------------------
+  # REDIS — n8n queue backend / session cache
+  # ---------------------------------------------------------------------------
+  redis:
+    container_name: stllcweb3-redis
+    image: redis:7-alpine
+    ports:
+      - "6381:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - stllcweb3
+
+  # ---------------------------------------------------------------------------
+  # FRONTEND — dashboard static server
+  # ---------------------------------------------------------------------------
+  frontend:
+    container_name: stllcweb3-frontend
+    image: python:3.12-slim
+    working_dir: /app
+    command: python -m http.server 3031
+    ports:
+      - "3031:3031"
+    volumes:
+      - .:/app:ro
+    restart: unless-stopped
+    networks:
+      - stllcweb3
+
+volumes:
+  n8n_data:
+  redis_data:
+
+networks:
+  stllcweb3:
+    driver: bridge

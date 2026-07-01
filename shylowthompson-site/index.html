@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shylow Thompson — Strategic Consulting</title>
+  <meta name="description" content="Strategic consulting for bold businesses. Digital transformation, Web3, and technology strategy." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #FAFAF8;
+      --white:     #FFFFFF;
+      --ink:       #0C0B0A;
+      --ink-60:    #605F5C;
+      --ink-30:    #B8B6B2;
+      --gold:      #C9993A;
+      --gold-dark: #A87C28;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      font-size: 16px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      inset: 0 0 auto 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.5rem 5vw;
+      background: rgba(250,250,248,0.92);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+    }
+
+    .nav-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: var(--ink);
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 2.5rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-size: 0.82rem;
+      font-weight: 400;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--ink-60);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--ink); }
+
+    /* ── BUTTONS ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.65rem 1.5rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      transition: all 0.22s;
+    }
+    .btn-primary  { background: var(--ink);  color: var(--white); }
+    .btn-primary:hover  { background: var(--gold); }
+    .btn-outline  { background: transparent; color: var(--ink); border: 1px solid var(--ink); }
+    .btn-outline:hover  { background: var(--ink); color: var(--white); }
+    .btn-gold     { background: var(--gold); color: var(--white); }
+    .btn-gold:hover     { background: var(--gold-dark); }
+
+    /* ── HERO ── */
+    #hero {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      padding: 5rem 5vw 0;
+    }
+
+    .hero-left {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 4rem 6vw 4rem 0;
+    }
+
+    .hero-eyebrow {
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .hero-eyebrow::before {
+      content: '';
+      display: block;
+      width: 2rem;
+      height: 1px;
+      background: var(--gold);
+      flex-shrink: 0;
+    }
+
+    .hero-headline {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(3rem, 5.5vw, 5.25rem);
+      font-weight: 600;
+      line-height: 1.06;
+      letter-spacing: -0.01em;
+      color: var(--ink);
+      margin-bottom: 1.75rem;
+    }
+    .hero-headline em {
+      font-style: italic;
+      color: var(--gold);
+    }
+
+    .hero-sub {
+      font-size: 1.05rem;
+      font-weight: 300;
+      color: var(--ink-60);
+      max-width: 42ch;
+      line-height: 1.85;
+      margin-bottom: 2.5rem;
+    }
+
+    .hero-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
+
+    .hero-stat-row {
+      display: flex;
+      gap: 3rem;
+      margin-top: 3rem;
+      padding-top: 2.5rem;
+      border-top: 1px solid rgba(0,0,0,0.08);
+    }
+    .hero-stat span {
+      display: block;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.2rem;
+      font-weight: 600;
+      color: var(--ink);
+      line-height: 1;
+      margin-bottom: 0.3rem;
+    }
+    .hero-stat p {
+      font-size: 0.75rem;
+      color: var(--ink-60);
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+    }
+
+    .hero-right {
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+    }
+
+    .hero-graphic {
+      width: 100%;
+      max-width: 460px;
+      align-self: stretch;
+      background: linear-gradient(140deg, #111827 0%, #1a2744 55%, #0f3460 100%);
+      position: relative;
+      overflow: hidden;
+      clip-path: polygon(0 0, 100% 0, 100% 92%, 88% 100%, 0 100%);
+    }
+
+    .hero-graphic::before {
+      content: '';
+      position: absolute;
+      bottom: -60px; right: -60px;
+      width: 320px; height: 320px;
+      border-radius: 50%;
+      background: var(--gold);
+      opacity: 0.1;
+    }
+    .hero-graphic::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 1px;
+      height: 100%;
+      background: linear-gradient(to bottom, transparent 10%, rgba(201,153,58,0.4) 50%, transparent 90%);
+    }
+
+    .hero-graphic-content {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 3rem;
+    }
+    .hero-graphic-content h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.2rem;
+      font-weight: 500;
+      color: white;
+      line-height: 1.2;
+      margin-bottom: 0.75rem;
+    }
+    .hero-graphic-content p {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.4);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    /* ── SECTION BASE ── */
+    section { padding: 7rem 5vw; }
+
+    .section-label {
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1.25rem;
+    }
+
+    .section-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.2rem, 3.5vw, 3.25rem);
+      font-weight: 600;
+      line-height: 1.12;
+      color: var(--ink);
+      margin-bottom: 1.5rem;
+      max-width: 22ch;
+    }
+
+    .section-desc {
+      font-size: 1rem;
+      font-weight: 300;
+      color: var(--ink-60);
+      max-width: 52ch;
+      line-height: 1.85;
+    }
+
+    /* ── SERVICES ── */
+    #services { background: var(--white); }
+
+    .services-header {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: end;
+      margin-bottom: 5rem;
+    }
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5px;
+      background: rgba(0,0,0,0.07);
+    }
+
+    .service-card {
+      background: var(--white);
+      padding: 3rem 2.5rem;
+      transition: background 0.3s, transform 0.3s;
+      cursor: default;
+    }
+    .service-card:hover { background: var(--ink); }
+    .service-card:hover .service-num,
+    .service-card:hover .service-name,
+    .service-card:hover .service-desc { color: var(--white); }
+    .service-card:hover .service-bar  { background: var(--gold); }
+
+    .service-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.85rem;
+      color: var(--ink-30);
+      margin-bottom: 2rem;
+      transition: color 0.3s;
+    }
+    .service-bar {
+      width: 2.5rem;
+      height: 2px;
+      background: var(--gold);
+      margin-bottom: 1.75rem;
+      transition: background 0.3s;
+    }
+    .service-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.65rem;
+      font-weight: 600;
+      color: var(--ink);
+      line-height: 1.2;
+      margin-bottom: 1rem;
+      transition: color 0.3s;
+    }
+    .service-desc {
+      font-size: 0.9rem;
+      font-weight: 300;
+      color: var(--ink-60);
+      line-height: 1.8;
+      transition: color 0.3s;
+    }
+
+    /* ── CTA BAND ── */
+    #cta-band {
+      background: var(--ink);
+      padding: 6rem 5vw;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 3rem;
+    }
+    #cta-band .section-label { color: var(--gold); }
+    #cta-band .section-title { color: var(--white); max-width: 30ch; }
+
+    /* ── CONTACT ── */
+    #contact { background: var(--bg); }
+
+    .contact-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6rem;
+      align-items: start;
+    }
+
+    .contact-meta p {
+      font-size: 0.95rem;
+      font-weight: 300;
+      color: var(--ink-60);
+      line-height: 1.85;
+      margin-bottom: 2.5rem;
+    }
+    .contact-details { display: flex; flex-direction: column; gap: 1.5rem; }
+    .contact-item span {
+      display: block;
+      font-size: 0.68rem;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--ink-30);
+      margin-bottom: 0.2rem;
+    }
+    .contact-item a {
+      font-size: 1rem;
+      color: var(--ink);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .contact-item a:hover { color: var(--gold); }
+
+    .contact-form { display: flex; flex-direction: column; gap: 1.5rem; }
+
+    .form-field { display: flex; flex-direction: column; gap: 0.4rem; }
+    .form-field label {
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink-60);
+    }
+    .form-field input,
+    .form-field textarea {
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid rgba(0,0,0,0.14);
+      padding: 0.75rem 0;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1rem;
+      color: var(--ink);
+      outline: none;
+      transition: border-color 0.2s;
+      resize: none;
+      width: 100%;
+    }
+    .form-field input:focus,
+    .form-field textarea:focus { border-bottom-color: var(--gold); }
+    .form-field textarea { min-height: 110px; }
+
+    #form-status {
+      font-size: 0.85rem;
+      color: var(--gold);
+      display: none;
+      margin-top: -0.5rem;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 2rem 5vw;
+      border-top: 1px solid rgba(0,0,0,0.07);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    footer p   { font-size: 0.78rem; color: var(--ink-30); }
+    footer a   { font-size: 0.78rem; color: var(--ink-60); text-decoration: none; transition: color 0.2s; }
+    footer a:hover { color: var(--gold); }
+
+    /* ── ANIMATIONS ── */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.65s ease, transform 0.65s ease;
+    }
+    .fade-up.in { opacity: 1; transform: translateY(0); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 960px) {
+      #hero { grid-template-columns: 1fr; }
+      .hero-right { display: none; }
+      .services-header { grid-template-columns: 1fr; gap: 2rem; }
+      .contact-inner { grid-template-columns: 1fr; gap: 3rem; }
+      #cta-band { grid-template-columns: 1fr; }
+      .nav-links li:not(:last-child) { display: none; }
+    }
+
+    @media (max-width: 560px) {
+      .hero-stat-row { gap: 2rem; }
+      .services-grid { grid-template-columns: 1fr; }
+      nav { padding: 1.25rem 5vw; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="#hero" class="nav-logo">Shylow Thompson</a>
+    <ul class="nav-links">
+      <li><a href="#services">Services</a></li>
+      <li><a href="#contact">Contact</a></li>
+      <li><a href="/app/" class="btn btn-gold" target="_blank" rel="noopener">Web3 App ↗</a></li>
+      <li><a href="https://realtor-agent-3q1p.onrender.com" class="btn btn-gold" target="_blank" rel="noopener">Realtor Agent ↗</a></li>
+      <li><a href="#contact" class="btn btn-primary">Work With Me</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero">
+    <div class="hero-left">
+      <p class="hero-eyebrow">Strategic Consulting</p>
+      <h1 class="hero-headline">
+        Consulting for<br /><em>bold</em><br />businesses.
+      </h1>
+      <p class="hero-sub">
+        We help forward-thinking companies navigate digital transformation, embrace emerging technology, and build for what's next.
+      </p>
+      <div class="hero-actions">
+        <a href="/app/" class="btn btn-primary" target="_blank" rel="noopener">Launch App ↗</a>
+        <a href="#services" class="btn btn-outline">View Services</a>
+      </div>
+      <div class="hero-stat-row">
+        <div class="hero-stat">
+          <span>Year 1</span>
+          <p>& Scaling Fast</p>
+        </div>
+        <div class="hero-stat">
+          <span>5+</span>
+          <p>Clients Served</p>
+        </div>
+        <div class="hero-stat">
+          <span>$50K+</span>
+          <p>In Deals Closed</p>
+        </div>
+      </div>
+    </div>
+    <div class="hero-right">
+      <div class="hero-graphic">
+        <div class="hero-graphic-content">
+          <h3>Transform<br />your digital<br />future.</h3>
+          <p>shylowthompson.com</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SERVICES -->
+  <section id="services">
+    <div class="services-header fade-up">
+      <div>
+        <p class="section-label">What I Do</p>
+        <h2 class="section-title">Services built for transformation.</h2>
+      </div>
+      <p class="section-desc">
+        Every engagement is designed to move your business forward — with strategy grounded in reality and execution that delivers measurable results.
+      </p>
+    </div>
+
+    <div class="services-grid">
+      <div class="service-card fade-up">
+        <p class="service-num">01</p>
+        <div class="service-bar"></div>
+        <h3 class="service-name">Digital Strategy</h3>
+        <p class="service-desc">Map a clear path from where you are to where you need to be. We align your technology investments with business outcomes that actually matter.</p>
+      </div>
+      <div class="service-card fade-up">
+        <p class="service-num">02</p>
+        <div class="service-bar"></div>
+        <h3 class="service-name">Web3 &amp; Blockchain</h3>
+        <p class="service-desc">Navigate the frontier of decentralized technology. From token strategy to smart contract architecture — built for your business, not the hype.</p>
+      </div>
+      <div class="service-card fade-up">
+        <p class="service-num">03</p>
+        <div class="service-bar"></div>
+        <h3 class="service-name">Systems &amp; Automation</h3>
+        <p class="service-desc">Eliminate friction. Streamline operations and automate the work that doesn't need humans, so your team can focus on what does.</p>
+      </div>
+      <div class="service-card fade-up">
+        <p class="service-num">04</p>
+        <div class="service-bar"></div>
+        <h3 class="service-name">Technology Roadmapping</h3>
+        <p class="service-desc">Complex transformations require clear direction. We build the roadmap, identify the risks, and guide you through execution — step by step.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA BAND -->
+  <div id="cta-band" class="fade-up">
+    <div>
+      <p class="section-label">Ready to Begin</p>
+      <h2 class="section-title">Let's build something bold together.</h2>
+    </div>
+    <a href="#contact" class="btn btn-gold" style="padding:1rem 2.5rem;font-size:0.9rem;white-space:nowrap;">
+      Start a Conversation →
+    </a>
+  </div>
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <div class="contact-inner">
+      <div class="fade-up">
+        <p class="section-label">Get In Touch</p>
+        <h2 class="section-title">Let's talk about your business.</h2>
+        <div class="contact-meta">
+          <p>Whether you're starting a transformation or looking to accelerate one already in motion, I'd love to hear about your goals.</p>
+          <div class="contact-details">
+            <div class="contact-item">
+              <span>Email</span>
+              <a href="mailto:admin@shylowthompson.com">admin@shylowthompson.com</a>
+            </div>
+            <div class="contact-item">
+              <span>Availability</span>
+              <a>Accepting new clients</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <form class="contact-form fade-up" onsubmit="handleSubmit(event)">
+        <div class="form-field">
+          <label for="name">Your Name</label>
+          <input type="text" id="name" placeholder="Full name" required />
+        </div>
+        <div class="form-field">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" placeholder="you@company.com" required />
+        </div>
+        <div class="form-field">
+          <label for="company">Company</label>
+          <input type="text" id="company" placeholder="Your business" />
+        </div>
+        <div class="form-field">
+          <label for="message">How can I help?</label>
+          <textarea id="message" placeholder="Tell me about your goals..." required></textarea>
+        </div>
+        <p id="form-status">Message sent — I'll be in touch shortly.</p>
+        <button type="submit" class="btn btn-primary" style="width:fit-content;">
+          Send Message →
+        </button>
+      </form>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>© 2026 Shylow Thompson. All rights reserved.</p>
+    <a href="mailto:admin@shylowthompson.com">admin@shylowthompson.com</a>
+  </footer>
+
+  <script>
+    // Scroll-in animations
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('.fade-up').forEach(el => io.observe(el));
+
+    // Contact form — opens mailto (works on any static host)
+    function handleSubmit(e) {
+      e.preventDefault();
+      const name    = document.getElementById('name').value;
+      const email   = document.getElementById('email').value;
+      const company = document.getElementById('company').value;
+      const message = document.getElementById('message').value;
+      const subject = encodeURIComponent(`Inquiry from ${name}`);
+      const body    = encodeURIComponent(
+        `Name: ${name}\nEmail: ${email}\nCompany: ${company}\n\n${message}`
+      );
+      window.location.href =
+        `mailto:admin@shylowthompson.com?subject=${subject}&body=${body}`;
+      document.getElementById('form-status').style.display = 'block';
+      e.target.reset();
+    }
+  </script>
+
+</body>
+</html>

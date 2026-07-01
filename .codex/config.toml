@@ -1,0 +1,17 @@
+[shell_environment_policy]
+inherit = "core"
+
+[shell_environment_policy.set]
+HARDHAT_NETWORK = "hardhat"
+DEV_SERVER_PORT = "3031"
+DEV_SERVER_ROOT = "c:/stllcweb3"
+
+[mcp_servers.ollama]
+command = "npx"
+args = [
+    "-y",
+    "ollama-mcp",
+]
+
+[mcp_servers.ollama.env]
+OLLAMA_HOST = "http://localhost:11434"
