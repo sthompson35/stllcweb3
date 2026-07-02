@@ -10,10 +10,11 @@ services:
       - .:/app
       - /app/node_modules
       - /app/alchemy/node_modules
-    # Use nodemon for hot-reload in dev
-    command: >
-      sh -c "npm install -g nodemon --silent &&
-             nodemon --watch alchemy/ --ext js alchemy/webhook-server.js"
+    # Use nodemon for hot-reload in dev (list form avoids CRLF/folding issues on Windows)
+    command:
+      - /bin/sh
+      - -c
+      - "cd /app && npm install --ignore-scripts --silent && cd /app/alchemy && npm install --ignore-scripts --silent && cd /app && node_modules/.bin/nodemon --watch alchemy/ --ext js --inspect=0.0.0.0:9229 alchemy/webhook-server.js"
     environment:
       - NODE_ENV=development
       - DEBUG=stllc:*
