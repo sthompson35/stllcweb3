@@ -14,8 +14,8 @@ COPY package.json package-lock.json ./
 RUN npm ci --omit=dev --ignore-scripts
 
 # Alchemy webhook-server dependencies
-COPY alchemy/package.json alchemy/package-lock.json ./alchemy/
-RUN cd alchemy && npm ci --omit=dev
+COPY alchemy/package.json alchemy/package-lock.json* ./alchemy/
+RUN cd alchemy && npm install --omit=dev --ignore-scripts
 
 # ── Stage 2: Compile Solidity contracts ───────────────────────────────────────
 FROM node:22-alpine AS builder
