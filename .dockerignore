@@ -1,0 +1,48 @@
+# Dependencies
+node_modules/
+alchemy/node_modules/
+frontend/node_modules/
+dynasty_property_os/
+realtor-agent-deploy/
+shylowthompson-site/
+
+# Git
+.git/
+.gitignore
+
+# Hardhat cache & coverage
+cache/
+coverage/
+coverage.json
+
+# Build output
+frontend/dist/
+
+# Secrets — never bake into image
+.env
+.env.local
+.env.*.local
+*.ops-wallet-backup.txt
+*-wallet-backup.txt
+
+# Editor & OS
+.vscode/
+.idea/
+.DS_Store
+*.log
+
+# Test files
+test/
+
+# Python scripts
+*.py
+recalc_windows.py
+extract_propertyos.py
+build_dynasty_part*.py
+
+# Misc large assets
+*.zip
+*.xlsx
+bots/
+sequence/
+dashboard/
