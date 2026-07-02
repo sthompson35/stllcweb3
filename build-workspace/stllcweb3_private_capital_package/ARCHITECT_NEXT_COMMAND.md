@@ -1,0 +1,1 @@
+@ARCHITECT Build fund administration, distribution tracking, investor reporting, waterfall calculations, and tokenized ownership ledger so STLLCWeb3 can evolve from deal syndications into a full real-estate investment platform.

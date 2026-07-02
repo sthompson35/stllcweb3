@@ -1,0 +1,61 @@
+name: E2E Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  e2e:
+    name: Playwright E2E
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend deps
+        run: npm ci --ignore-scripts
+        working-directory: frontend
+
+      - name: Install Playwright + browsers
+        run: |
+          npm install -D @playwright/test
+          npx playwright install chromium --with-deps
+        working-directory: e2e
+
+      - name: Build frontend
+        run: npm run build
+        working-directory: frontend
+        env:
+          VITE_SEQUENCE_PROJECT_ACCESS_KEY: ${{ secrets.VITE_SEQUENCE_PROJECT_ACCESS_KEY }}
+          VITE_SEQUENCE_WAAS_CONFIG_KEY: ${{ secrets.VITE_SEQUENCE_WAAS_CONFIG_KEY }}
+          VITE_DEFAULT_CHAIN_ID: "80002"
+          VITE_CONTRACT_EQUITY: ${{ secrets.STAGING_CONTRACT_EQUITY }}
+          VITE_CONTRACT_NOTE: ${{ secrets.STAGING_CONTRACT_NOTE }}
+          VITE_CONTRACT_SHTX: ${{ secrets.STAGING_CONTRACT_SHTX }}
+          VITE_CONTRACT_TRACK: ${{ secrets.STAGING_CONTRACT_TRACK }}
+          VITE_CONTRACT_LOYALTY: ${{ secrets.STAGING_CONTRACT_LOYALTY }}
+
+      - name: Serve frontend + run E2E
+        run: |
+          npx serve -s ../frontend/dist -l 5173 &
+          sleep 3
+          E2E_BASE_URL=http://localhost:5173 npx playwright test --config playwright.config.ts
+        working-directory: e2e
+
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ github.run_number }}
+          path: e2e/playwright-report/
+          retention-days: 30

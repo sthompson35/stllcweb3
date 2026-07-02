@@ -1,0 +1,3 @@
+-- Optional demo seed. Replace IDs with real users/deals before running.
+-- insert into capital_commitments (deal_id, investor_user_id, committed_amount, funded_amount, status, ownership_percent, preferred_return_percent, profit_share_percent)
+-- values ('00000000-0000-0000-0000-000000000000','11111111-1111-1111-1111-111111111111',100000,60000,'partially_funded',10.000000,8.0000,20.0000);

@@ -1,0 +1,56 @@
+# render.yaml — stllcweb3 production services on Render
+# Deploy: connect Render to github.com/sthompson35/stllcweb3
+
+services:
+
+  # ── Webhook Server (Node.js) ─────────────────────────────────────────────────
+  - type: web
+    name: stllcweb3-webhook
+    runtime: node
+    region: ohio
+    plan: starter
+    branch: main
+    rootDir: .
+    buildCommand: npm ci --ignore-scripts
+    startCommand: node alchemy/webhook-server.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: WEBHOOK_PORT
+        value: "4041"
+      - key: ALCHEMY_API_KEY
+        sync: false
+      - key: ALCHEMY_AUTH_TOKEN
+        sync: false
+      - key: ALCHEMY_WEBHOOK_SIGNING_KEY
+        sync: false
+      - key: POLYGON_RPC_URL
+        sync: false
+      - key: CONTRACT_EQUITY
+        sync: false
+      - key: CONTRACT_NOTE
+        sync: false
+      - key: CONTRACT_SHTX
+        sync: false
+      - key: CONTRACT_TRACK
+        sync: false
+      - key: CONTRACT_LOYALTY
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: REDIS_URL
+        fromService:
+          name: stllcweb3-redis
+          type: redis
+          property: connectionString
+
+  # ── Redis ─────────────────────────────────────────────────────────────────────
+  - type: redis
+    name: stllcweb3-redis
+    region: ohio
+    plan: starter
+    maxmemoryPolicy: noeviction
+    ipAllowList: []          # only allow from same Render network

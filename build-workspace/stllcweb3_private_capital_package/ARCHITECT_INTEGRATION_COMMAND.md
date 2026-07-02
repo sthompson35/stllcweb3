@@ -1,0 +1,1 @@
+@ARCHITECT Integrate Phase 7 Private Capital Infrastructure into stllcweb3. Apply the Supabase migration, create the private deal-documents bucket, wire Supabase Auth bearer session into the private deal-room API calls, mount /deals/[dealId], test document vault access, subscription submission, internal signature stub creation, and capital commitment tracking.

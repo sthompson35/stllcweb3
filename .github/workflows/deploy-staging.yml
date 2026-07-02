@@ -1,0 +1,84 @@
+name: Deploy — Staging
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: true
+
+jobs:
+  # ── Run CI gate first ───────────────────────────────────────────────────────
+  ci-gate:
+    name: CI Gate
+    uses: ./.github/workflows/ci.yml
+    secrets: inherit
+
+  # ── Frontend → Vercel ───────────────────────────────────────────────────────
+  deploy-frontend:
+    name: Frontend → Vercel (staging)
+    runs-on: ubuntu-latest
+    needs: ci-gate
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Install deps
+        run: npm ci --ignore-scripts
+
+      - name: Build for staging
+        run: npm run build
+        env:
+          VITE_SEQUENCE_PROJECT_ACCESS_KEY: ${{ secrets.VITE_SEQUENCE_PROJECT_ACCESS_KEY }}
+          VITE_SEQUENCE_WAAS_CONFIG_KEY: ${{ secrets.VITE_SEQUENCE_WAAS_CONFIG_KEY }}
+          VITE_DEFAULT_CHAIN_ID: "80002"
+          VITE_CONTRACT_EQUITY: ${{ secrets.STAGING_CONTRACT_EQUITY }}
+          VITE_CONTRACT_NOTE: ${{ secrets.STAGING_CONTRACT_NOTE }}
+          VITE_CONTRACT_SHTX: ${{ secrets.STAGING_CONTRACT_SHTX }}
+          VITE_CONTRACT_TRACK: ${{ secrets.STAGING_CONTRACT_TRACK }}
+          VITE_CONTRACT_LOYALTY: ${{ secrets.STAGING_CONTRACT_LOYALTY }}
+
+      - name: Deploy to Vercel preview
+        run: vercel deploy dist --token=${{ secrets.VERCEL_TOKEN }} --yes
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+  # ── Webhook server → Render ─────────────────────────────────────────────────
+  deploy-webhook:
+    name: Webhook Server → Render (staging)
+    runs-on: ubuntu-latest
+    needs: ci-gate
+    steps:
+      - name: Trigger Render deploy
+        run: |
+          curl -sf -X POST \
+            "https://api.render.com/v1/services/${{ secrets.RENDER_SERVICE_ID }}/deploys" \
+            -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{}' | jq .
+
+      - name: Poll deploy status (max 5 min)
+        run: |
+          for i in $(seq 1 30); do
+            STATUS=$(curl -sf \
+              "https://api.render.com/v1/services/${{ secrets.RENDER_SERVICE_ID }}" \
+              -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" | jq -r '.serviceDetails.status')
+            echo "Status: $STATUS"
+            [ "$STATUS" = "live" ] && exit 0
+            sleep 10
+          done
+          echo "Deploy timed out" && exit 1

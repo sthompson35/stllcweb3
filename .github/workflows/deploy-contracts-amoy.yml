@@ -1,0 +1,68 @@
+name: Deploy Contracts — Polygon Amoy
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: "Type DEPLOY to confirm Amoy testnet deployment"
+        required: true
+      verify:
+        description: "Verify contracts on Polygonscan?"
+        type: boolean
+        default: true
+
+jobs:
+  deploy:
+    name: Deploy to Polygon Amoy
+    runs-on: ubuntu-latest
+    if: github.event.inputs.confirm == 'DEPLOY'
+    environment: amoy-testnet
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install deps
+        run: npm ci --ignore-scripts
+
+      - name: Compile contracts
+        run: npx hardhat compile --quiet
+
+      - name: Run tests before deploy
+        run: npx hardhat test --network hardhat
+
+      - name: Deploy to Polygon Amoy
+        id: deploy
+        run: npx hardhat run scripts/deploy.js --network polygonAmoy
+        env:
+          DEPLOYER_PRIVATE_KEY: ${{ secrets.DEPLOYER_PRIVATE_KEY }}
+          POLYGON_AMOY_RPC_URL: ${{ secrets.POLYGON_AMOY_RPC_URL }}
+          MANAGER_WALLET: ${{ secrets.MANAGER_WALLET }}
+          POLYGONSCAN_API_KEY: ${{ secrets.POLYGONSCAN_API_KEY }}
+
+      - name: Verify contracts on Polygonscan
+        if: github.event.inputs.verify == 'true'
+        run: npx hardhat run scripts/polygonscan-verify.js --network polygonAmoy
+        env:
+          DEPLOYER_PRIVATE_KEY: ${{ secrets.DEPLOYER_PRIVATE_KEY }}
+          POLYGON_AMOY_RPC_URL: ${{ secrets.POLYGON_AMOY_RPC_URL }}
+          POLYGONSCAN_API_KEY: ${{ secrets.POLYGONSCAN_API_KEY }}
+
+      - name: Upload deployment artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: amoy-deployment-${{ github.run_number }}
+          path: deployments/amoy.json
+          retention-days: 90
+
+      - name: Commit deployment addresses
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add deployments/
+          git diff --cached --quiet || git commit -m "chore: amoy deployment addresses [run #${{ github.run_number }}]"
+          git push

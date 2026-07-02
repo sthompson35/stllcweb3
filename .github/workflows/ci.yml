@@ -1,0 +1,82 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ── Smart contract tests ────────────────────────────────────────────────────
+  test-contracts:
+    name: Hardhat Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install root deps
+        run: npm ci --ignore-scripts
+
+      - name: Compile contracts
+        run: npx hardhat compile --quiet
+
+      - name: Run test suite
+        run: npx hardhat test --network hardhat
+        env:
+          REPORT_GAS: true
+
+  # ── Frontend build ──────────────────────────────────────────────────────────
+  build-frontend:
+    name: Frontend Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend deps
+        run: npm ci --ignore-scripts
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Build
+        run: npm run build
+        env:
+          VITE_SEQUENCE_PROJECT_ACCESS_KEY: ${{ secrets.VITE_SEQUENCE_PROJECT_ACCESS_KEY }}
+          VITE_SEQUENCE_WAAS_CONFIG_KEY: ${{ secrets.VITE_SEQUENCE_WAAS_CONFIG_KEY }}
+          VITE_DEFAULT_CHAIN_ID: "80002"
+          VITE_CONTRACT_EQUITY: ${{ secrets.VITE_CONTRACT_EQUITY }}
+          VITE_CONTRACT_NOTE: ${{ secrets.VITE_CONTRACT_NOTE }}
+          VITE_CONTRACT_SHTX: ${{ secrets.VITE_CONTRACT_SHTX }}
+          VITE_CONTRACT_TRACK: ${{ secrets.VITE_CONTRACT_TRACK }}
+          VITE_CONTRACT_LOYALTY: ${{ secrets.VITE_CONTRACT_LOYALTY }}
+
+  # ── Docker image build check ────────────────────────────────────────────────
+  build-docker:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build stllc image
+        run: docker build -t stllc:ci .
+
+      - name: Smoke-test container
+        run: docker run --rm stllc:ci node --version
