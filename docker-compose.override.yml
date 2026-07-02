@@ -1,0 +1,59 @@
+# stllcweb3 — Docker Compose OVERRIDE (auto-loaded in development)
+# Automatically merged when running: docker compose up
+# Adds: source volume mounts, hot-reload, debug ports, verbose logging
+
+services:
+
+  webhook-server:
+    # Mount source for live edits without rebuild
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/alchemy/node_modules
+    # Use nodemon for hot-reload in dev
+    command: >
+      sh -c "npm install -g nodemon --silent &&
+             nodemon --watch alchemy/ --ext js alchemy/webhook-server.js"
+    environment:
+      - NODE_ENV=development
+      - DEBUG=stllc:*
+    # Expose Node.js inspector port
+    ports:
+      - "4041:4041"
+      - "9229:9229"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  redis:
+    # Expose redis directly for local debugging / redis-cli access
+    ports:
+      - "6381:6379"
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+  n8n:
+    environment:
+      - N8N_LOG_LEVEL=debug
+      - N8N_BASIC_AUTH_ACTIVE=false   # no auth in local dev
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  frontend:
+    # In dev, serve the dist folder (run `npm run build` in frontend/ first)
+    # Switch to docker-compose.dev.yml for Vite hot-module-reload instead
+    volumes:
+      - ./frontend/dist:/app/frontend/dist:ro
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "2"

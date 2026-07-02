@@ -1,0 +1,79 @@
+# stllcweb3 — Docker Compose DEV
+# Usage: docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+#
+# Adds: Vite dev server with HMR, hardhat local node, nodemon webhook server
+
+services:
+
+  # ---------------------------------------------------------------------------
+  # WEBHOOK SERVER — hot-reload via nodemon
+  # ---------------------------------------------------------------------------
+  webhook-server:
+    image: node:22-alpine
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/alchemy/node_modules
+    working_dir: /app
+    command: >
+      sh -c "cd /app && npm install --ignore-scripts --silent &&
+             cd /app/alchemy && npm install --ignore-scripts --silent &&
+             cd /app && node_modules/.bin/nodemon
+               --watch alchemy/ --ext js
+               --inspect=0.0.0.0:9229
+               alchemy/webhook-server.js"
+    environment:
+      - NODE_ENV=development
+      - WEBHOOK_PORT=4041
+      - DEBUG=stllc:*
+    ports:
+      - "4041:4041"
+      - "9229:9229"   # Node inspector
+
+  # ---------------------------------------------------------------------------
+  # FRONTEND — Vite dev server with hot-module-reload
+  # ---------------------------------------------------------------------------
+  frontend:
+    container_name: stllcweb3-frontend-dev
+    image: node:22-alpine
+    working_dir: /app/frontend
+    command: sh -c "npm install --ignore-scripts --silent && npm run dev -- --host 0.0.0.0"
+    ports:
+      - "5173:5173"
+    volumes:
+      - .:/app
+      - /app/frontend/node_modules
+    environment:
+      - NODE_ENV=development
+      - VITE_WEBHOOK_URL=http://localhost:4041
+      - VITE_APP_ENV=development
+    networks:
+      - stllcweb3
+
+  # ---------------------------------------------------------------------------
+  # HARDHAT NODE — local EVM blockchain for contract testing
+  # ---------------------------------------------------------------------------
+  hardhat-node:
+    container_name: stllcweb3-hardhat
+    image: node:22-alpine
+    working_dir: /app
+    command: >
+      sh -c "npm install --ignore-scripts --silent &&
+             npx hardhat node --hostname 0.0.0.0"
+    ports:
+      - "8545:8545"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    networks:
+      - stllcweb3
+
+  # ---------------------------------------------------------------------------
+  # N8N — disable auth for local dev
+  # ---------------------------------------------------------------------------
+  n8n:
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=false
+      - N8N_LOG_LEVEL=debug

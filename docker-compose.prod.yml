@@ -1,0 +1,99 @@
+# stllcweb3 — Docker Compose PRODUCTION
+# Usage: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+#
+# - Uses built stllc image (no volume mounts — immutable image)
+# - Resource limits enforced
+# - N8N auth required
+# - Redis password protected
+# - Restart: always
+
+services:
+
+  # ---------------------------------------------------------------------------
+  # WEBHOOK SERVER — production build, no volume mounts
+  # ---------------------------------------------------------------------------
+  webhook-server:
+    image: stllc:latest
+    container_name: stllcweb3-webhook-prod
+    command: node alchemy/webhook-server.js
+    restart: always
+    environment:
+      - NODE_ENV=production
+      - WEBHOOK_PORT=4041
+    # No source volume — baked into image
+    volumes: []
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 256M
+        reservations:
+          memory: 128M
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
+
+  # ---------------------------------------------------------------------------
+  # REDIS — password protected in production
+  # ---------------------------------------------------------------------------
+  redis:
+    restart: always
+    command: >
+      redis-server
+        --appendonly yes
+        --requirepass ${REDIS_PASSWORD:?REDIS_PASSWORD must be set in production}
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 128M
+
+  # ---------------------------------------------------------------------------
+  # N8N — enforced auth + production webhook URL
+  # ---------------------------------------------------------------------------
+  n8n:
+    restart: always
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=${N8N_BASIC_AUTH_USER:?N8N_BASIC_AUTH_USER must be set}
+      - N8N_BASIC_AUTH_PASSWORD=${N8N_BASIC_AUTH_PASSWORD:?N8N_BASIC_AUTH_PASSWORD must be set}
+      - N8N_LOG_LEVEL=warn
+      - N8N_PROTOCOL=https
+      - N8N_HOST=${N8N_HOST:?N8N_HOST must be set}
+      - WEBHOOK_URL=${N8N_WEBHOOK_URL:?N8N_WEBHOOK_URL must be set}
+      - QUEUE_BULL_REDIS_PASSWORD=${REDIS_PASSWORD}
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 512M
+
+  # ---------------------------------------------------------------------------
+  # FRONTEND — serve pre-built Vite dist via Nginx
+  # ---------------------------------------------------------------------------
+  frontend:
+    container_name: stllcweb3-frontend-prod
+    image: nginx:1.27-alpine
+    working_dir: /usr/share/nginx/html
+    command: nginx -g "daemon off;"
+    ports:
+      - "3031:80"
+    volumes:
+      - ./frontend/dist:/usr/share/nginx/html:ro
+      - ./docker/nginx/prod.conf:/etc/nginx/conf.d/default.conf:ro
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 64M
+    # Remove the python healthcheck override from base
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:80"]
+      interval: 30s
+      timeout: 5s
+      retries: 3

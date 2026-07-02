@@ -1,0 +1,81 @@
+# stllcweb3 — Docker Compose TEST
+# Usage: docker compose -f docker-compose.yml -f docker-compose.test.yml up --abort-on-container-exit
+#
+# - Runs hardhat test suite in an isolated container
+# - Isolated test network (no port conflicts with dev)
+# - Containers exit when tests finish; CI reads exit code
+
+services:
+
+  # ---------------------------------------------------------------------------
+  # HARDHAT TEST RUNNER — exits with test pass/fail code
+  # ---------------------------------------------------------------------------
+  hardhat-test:
+    container_name: stllcweb3-test-runner
+    image: node:22-alpine
+    working_dir: /app
+    command: >
+      sh -c "npm install --ignore-scripts --silent &&
+             npx hardhat compile --quiet &&
+             npx hardhat test --network hardhat"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=test
+      - REPORT_GAS=true
+    networks:
+      - stllcweb3-test
+    # Do not restart — exit code drives CI pass/fail
+    restart: "no"
+
+  # ---------------------------------------------------------------------------
+  # WEBHOOK SERVER TEST — minimal instance pointed at test chain
+  # ---------------------------------------------------------------------------
+  webhook-server:
+    image: stllc:latest
+    container_name: stllcweb3-webhook-test
+    environment:
+      - NODE_ENV=test
+      - WEBHOOK_PORT=4041
+      # No real signing key required in test
+      - ALCHEMY_WEBHOOK_SIGNING_KEY=test-signing-key
+    ports:
+      - "4041:4041"
+    volumes: []
+    networks:
+      - stllcweb3-test
+    restart: "no"
+
+  # ---------------------------------------------------------------------------
+  # REDIS TEST — ephemeral, no persistence
+  # ---------------------------------------------------------------------------
+  redis:
+    container_name: stllcweb3-redis-test
+    volumes: []          # no persistence in test
+    command: redis-server
+    networks:
+      - stllcweb3-test
+    restart: "no"
+
+  # ---------------------------------------------------------------------------
+  # N8N TEST — disabled (not needed for contract/webhook tests)
+  # ---------------------------------------------------------------------------
+  n8n:
+    profiles:
+      - n8n-test          # only start if explicitly: --profile n8n-test
+    restart: "no"
+
+  # ---------------------------------------------------------------------------
+  # FRONTEND TEST — not started in test suite
+  # ---------------------------------------------------------------------------
+  frontend:
+    profiles:
+      - frontend-test
+    restart: "no"
+
+networks:
+  stllcweb3-test:
+    driver: bridge
+
+# No named volumes — test state is ephemeral
