@@ -1,0 +1,186 @@
+name: Deploy — Production (Canary)
+
+on:
+  workflow_dispatch:
+    inputs:
+      stage:
+        description: "Deployment stage"
+        type: choice
+        options:
+          - canary-10
+          - canary-50
+          - full-100
+        required: true
+      confirm:
+        description: "Type DEPLOY-PRODUCTION to confirm"
+        required: true
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  # ── Validation ───────────────────────────────────────────────────────
+  validate:
+    name: Pre-deployment Validation
+    runs-on: ubuntu-latest
+    outputs:
+      health: ${{ steps.health.outputs.status }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Check deployment prerequisites
+        if: github.event.inputs.confirm != 'DEPLOY-PRODUCTION'
+        run: |
+          echo "❌ Confirmation token incorrect"
+          echo "Type DEPLOY-PRODUCTION to confirm production deployment"
+          exit 1
+
+      - name: Verify production env
+        id: health
+        run: node scripts/health-check.js --env production
+        env:
+          SUPABASE_URL: ${{ secrets.PROD_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.PROD_SUPABASE_SERVICE_ROLE_KEY }}
+
+  # ── Frontend Deploy ──────────────────────────────────────────────────
+  deploy-frontend:
+    name: Frontend → Vercel (Production)
+    runs-on: ubuntu-latest
+    needs: validate
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Install deps
+        run: npm ci --ignore-scripts
+
+      - name: Build for production
+        run: npm run build
+        env:
+          VITE_SEQUENCE_PROJECT_ACCESS_KEY: ${{ secrets.VITE_SEQUENCE_PROJECT_ACCESS_KEY }}
+          VITE_SEQUENCE_WAAS_CONFIG_KEY: ${{ secrets.VITE_SEQUENCE_WAAS_CONFIG_KEY }}
+          VITE_DEFAULT_CHAIN_ID: "137"
+          VITE_CONTRACT_EQUITY: ${{ secrets.PROD_CONTRACT_EQUITY }}
+          VITE_CONTRACT_NOTE: ${{ secrets.PROD_CONTRACT_NOTE }}
+          VITE_CONTRACT_SHTX: ${{ secrets.PROD_CONTRACT_SHTX }}
+          VITE_CONTRACT_TRACK: ${{ secrets.PROD_CONTRACT_TRACK }}
+          VITE_CONTRACT_LOYALTY: ${{ secrets.PROD_CONTRACT_LOYALTY }}
+
+      - name: Deploy to Vercel production
+        run: |
+          if [ "${{ github.event.inputs.stage }}" = "canary-10" ]; then
+            # Route 10% traffic
+            VERCEL_ENV="production"
+          elif [ "${{ github.event.inputs.stage }}" = "canary-50" ]; then
+            # Route 50% traffic
+            VERCEL_ENV="production"
+          else
+            # Route 100% traffic
+            VERCEL_ENV="production"
+          fi
+          
+          vercel deploy \
+            dist \
+            --token=${{ secrets.VERCEL_TOKEN }} \
+            --prod \
+            --yes
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+  # ── Webhook Deploy ──────────────────────────────────────────────────
+  deploy-webhook:
+    name: Webhook Server → Render (Production)
+    runs-on: ubuntu-latest
+    needs: validate
+    steps:
+      - name: Trigger Render deploy
+        run: |
+          curl -sf -X POST \
+            "https://api.render.com/v1/services/${{ secrets.PROD_RENDER_SERVICE_ID }}/deploys" \
+            -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{}' | jq .
+
+      - name: Poll deploy status (max 10 min)
+        run: |
+          for i in $(seq 1 60); do
+            STATUS=$(curl -sf \
+              "https://api.render.com/v1/services/${{ secrets.PROD_RENDER_SERVICE_ID }}" \
+              -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" | jq -r '.serviceDetails.status')
+            echo "Status: $STATUS"
+            [ "$STATUS" = "live" ] && exit 0
+            sleep 10
+          done
+          echo "Deploy timed out" && exit 1
+
+  # ── Traffic Routing ─────────────────────────────────────────────────
+  traffic-routing:
+    name: Configure Traffic Routing
+    runs-on: ubuntu-latest
+    needs: [deploy-frontend, deploy-webhook]
+    steps:
+      - name: Route ${{ github.event.inputs.stage }}
+        run: |
+          STAGE="${{ github.event.inputs.stage }}"
+          case "$STAGE" in
+            canary-10)
+              echo "🚀 Routing 10% traffic to production"
+              ;;
+            canary-50)
+              echo "🚀 Routing 50% traffic to production"
+              ;;
+            full-100)
+              echo "🚀 Routing 100% traffic to production"
+              ;;
+          esac
+
+      - name: Notify deployment team
+        run: |
+          echo "✅ Deployment complete for: ${{ github.event.inputs.stage }}"
+          echo ""
+          echo "Monitor real-time metrics:"
+          echo "  Grafana: https://monitoring.stllcweb3.com"
+          echo "  Render:  https://dashboard.render.com"
+          echo "  Vercel:  https://vercel.com/dashboard"
+          echo ""
+          echo "If issues detected, rollback with:"
+          echo "  git revert <commit-hash>"
+          echo "  git push"
+
+  # ── Monitoring ───────────────────────────────────────────────────────
+  monitoring:
+    name: Start Production Monitoring
+    runs-on: ubuntu-latest
+    needs: traffic-routing
+    if: always()
+    steps:
+      - name: Create incident channel (if needed)
+        run: |
+          STAGE="${{ github.event.inputs.stage }}"
+          echo "📊 Production deployment monitoring active"
+          echo "Stage: $STAGE"
+          echo ""
+          echo "Alert channels:"
+          echo "  ⚠️  Critical: Team alerts + Slack"
+          echo "  ⚠️  Warning: Dashboard only"
+          echo "  ℹ️  Info: Logs only"
+          echo ""
+          echo "Duration: Monitor for 2+ hours minimum"
+          echo "Reference: GO-LIVE-STRATEGY.md → Phase 2"

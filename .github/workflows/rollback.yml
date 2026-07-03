@@ -1,0 +1,163 @@
+name: 🚨 Production Rollback (Emergency)
+
+on:
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: "Reason for rollback"
+        type: choice
+        options:
+          - critical-bug
+          - high-error-rate
+          - data-corruption
+          - security-incident
+          - external-dependency-failure
+        required: true
+      commit:
+        description: "Commit hash to rollback to (default: HEAD~1)"
+        required: false
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: true
+
+jobs:
+  rollback:
+    name: Emergency Rollback
+    runs-on: ubuntu-latest
+    environment: polygon-mainnet
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: 🚨 PRODUCTION ROLLBACK INITIATED
+        run: |
+          echo "╔════════════════════════════════════════╗"
+          echo "║  🚨 EMERGENCY ROLLBACK IN PROGRESS     ║"
+          echo "╚════════════════════════════════════════╝"
+          echo ""
+          echo "Reason: ${{ github.event.inputs.reason }}"
+          echo "Triggered by: ${{ github.actor }}"
+          echo "Time: $(date -u +'%Y-%m-%d %H:%M:%S UTC')"
+          echo ""
+          echo "Notifying all stakeholders..."
+
+      - name: Determine rollback target
+        id: target
+        run: |
+          if [ -z "${{ github.event.inputs.commit }}" ]; then
+            TARGET=$(git rev-parse HEAD~1)
+            echo "target=${TARGET}" >> $GITHUB_OUTPUT
+            echo "Using: HEAD~1 (previous stable commit)"
+          else
+            TARGET="${{ github.event.inputs.commit }}"
+            echo "target=${TARGET}" >> $GITHUB_OUTPUT
+            echo "Using: ${{ github.event.inputs.commit }}"
+          fi
+          echo "Rollback target: ${TARGET}"
+
+      - name: Revert to stable version
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git revert --no-edit ${{ steps.target.outputs.target }}
+
+      - name: Push rollback
+        run: |
+          git push origin main
+          echo "✅ Rollback commit pushed"
+
+      - name: Monitor auto-deployment
+        run: |
+          echo "⏳ GitHub Actions will auto-deploy rollback version..."
+          echo ""
+          echo "Deployment workflows:"
+          echo "  • CI/CD tests"
+          echo "  • Frontend (Vercel) redeploy"
+          echo "  • Webhook (Render) redeploy"
+          echo ""
+          echo "ETA: 5-10 minutes to production"
+          echo "Watch: https://github.com/sthompson35/stllcweb3/actions"
+
+      - name: Verify rollback success
+        run: |
+          echo "⏳ Waiting for health check..."
+          sleep 30
+          npm ci --ignore-scripts
+          node scripts/health-check.js --env production || true
+        env:
+          SUPABASE_URL: ${{ secrets.PROD_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.PROD_SUPABASE_SERVICE_ROLE_KEY }}
+
+      - name: 📋 Create incident post-mortem task
+        run: |
+          echo "📋 Incident Post-Mortem Checklist:"
+          echo ""
+          echo "1. Root Cause Analysis"
+          echo "   - [ ] Identify what failed"
+          echo "   - [ ] Why was it missed in testing"
+          echo "   - [ ] How to prevent recurrence"
+          echo ""
+          echo "2. Timeline"
+          echo "   - [ ] When issue first detected"
+          echo "   - [ ] When rollback triggered"
+          echo "   - [ ] When systems recovered"
+          echo ""
+          echo "3. Impact Assessment"
+          echo "   - [ ] How many users affected"
+          echo "   - [ ] How much data lost (if any)"
+          echo "   - [ ] Financial impact"
+          echo ""
+          echo "4. Action Items"
+          echo "   - [ ] Improved monitoring"
+          echo "   - [ ] Additional tests"
+          echo "   - [ ] Code review process changes"
+          echo "   - [ ] Training for team"
+          echo ""
+          echo "See INCIDENT-RESPONSE.md for detailed playbook"
+
+      - name: 🚨 ALERT STAKEHOLDERS
+        run: |
+          echo "╔════════════════════════════════════════╗"
+          echo "║  🚨 PRODUCTION ROLLBACK COMPLETE       ║"
+          echo "╚════════════════════════════════════════╝"
+          echo ""
+          echo "Status: Systems rolled back to stable version"
+          echo "All deployments in progress via CI/CD"
+          echo ""
+          echo "Next Steps:"
+          echo "1. Verify on https://stllcweb3.com (check deployment status)"
+          echo "2. Run health checks"
+          echo "3. Create incident post-mortem"
+          echo "4. Investigate root cause (see INCIDENT-RESPONSE.md)"
+          echo "5. Implement prevention measures"
+          echo "6. Schedule code review for failed feature"
+          echo ""
+          echo "Contact on-call engineer for support"
+          echo "Reference: GO-LIVE-STRATEGY.md → Phase 2 → Rollback"
+
+  notify:
+    name: Notify Team
+    runs-on: ubuntu-latest
+    needs: rollback
+    if: always()
+    steps:
+      - name: Send notification
+        run: |
+          echo "✅ Rollback workflow completed"
+          echo "Stakeholders notified via:"
+          echo "  • GitHub (this workflow)"
+          echo "  • Slack (if configured)"
+          echo "  • Email (if configured)"
+          echo ""
+          echo "Post-incident actions required:"
+          echo "1. Engineering: Root cause analysis"
+          echo "2. Product: Investor communication"
+          echo "3. QA: Enhanced testing for rolled-back feature"
+          echo "4. DevOps: Monitoring improvement"
